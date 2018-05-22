@@ -36,6 +36,7 @@ public class MyAIController extends CarController{
 		super(car);
 		this.pModule = new PerceptionModule(this, car);
 		this.dModule = new DecisionModule(this, car);
+		
 	}
 
 	public ArrayList<Coordinate> generatePath(HashMap<Integer, Coordinate> worldMap, ArrayList<Coordinate> unsearched, Coordinate source, Coordinate destination){
@@ -49,7 +50,7 @@ public class MyAIController extends CarController{
 		pModule.update();
 		path = dModule.generatePath();
 		checkStateChange();
-
+		HashMap<Coordinate, MapTile> currentView = this.getView();
 		// If you are not following a wall initially, find a wall to stick to!
 		if(!isFollowingWall){
 			if(getSpeed() < CAR_SPEED){

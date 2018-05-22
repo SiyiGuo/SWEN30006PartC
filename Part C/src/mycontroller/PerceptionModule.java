@@ -25,6 +25,7 @@ public class PerceptionModule {
 		this.knownMap = controller.getMap();
 		this.keyMap = new HashMap<Integer, Coordinate>();
 		this.unsearched = new ArrayList<Coordinate>();
+		this.exits = new ArrayList<Coordinate>();
 		for (Coordinate coor: knownMap.keySet()) {
 			if (knownMap.get(coor).isType(MapTile.Type.ROAD))
 				this.unsearched.add(coor);
@@ -36,7 +37,7 @@ public class PerceptionModule {
 	public void update() {
 
 		// Gets what the car can see
-		HashMap<Coordinate, MapTile> currentView = this.car.getView();
+		HashMap<Coordinate, MapTile> currentView = this.controller.getView();
 		
 		// update what the car have seen, check the keys.
 		for (Coordinate coor: currentView.keySet()) {
