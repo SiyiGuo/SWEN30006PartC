@@ -41,6 +41,7 @@ public abstract class CarController {
 	 * Speeds the car up in the backwards direction
 	 */
 	public void applyReverseAcceleration(){
+		System.out.println("Reversing");
 		this.car.applyReverseAcceleration();
 	}
 	
