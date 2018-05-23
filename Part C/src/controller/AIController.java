@@ -10,7 +10,7 @@ import world.WorldSpatial;
 public class AIController extends CarController {
 	
 	// How many minimum units the wall is away from the player.
-	private int wallSensitivity = 2;
+	private float wallSensitivity = (float) 2;
 	
 	
 	private boolean isFollowingWall = false; // This is initialized when the car sticks to a wall.
@@ -20,10 +20,10 @@ public class AIController extends CarController {
 	private WorldSpatial.Direction previousState = null; // Keeps track of the previous state
 	
 	// Car Speed to move at
-	private final float CAR_SPEED = 3;
+	private final float CAR_SPEED = (float)10;
 	
 	// Offset used to differentiate between 0 and 360 degrees
-	private int EAST_THRESHOLD = 3;
+	private int EAST_THRESHOLD = 360;
 	
 	public AIController(Car car) {
 		super(car);
