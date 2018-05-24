@@ -65,7 +65,7 @@ public class ActionModule {
 			this.lastStraightLineDirection = direction;
 		} else {
 			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
+				this.car.applyReverseAcceleration();
 			} else {
 				this.turn(delta, direction);
 			}
@@ -94,15 +94,6 @@ public class ActionModule {
 			}
 		case NORTH:
 			if (nextPos.y > now_y) {
-				System.out.println(nextPos.y);
-				System.out.println(now_y);
-				return true;
-			}
-			else {
-				return false;
-			}
-		case SOUTH:
-			if (nextPos.y < now_y) {
 				System.out.println(nextPos.y);
 				System.out.println(now_y);
 				return true;
