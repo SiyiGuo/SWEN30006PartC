@@ -54,12 +54,72 @@ public class MyAIController extends CarController{
 
 			pModule.update(); 
 		    path = dModule.generatePath();
+		    System.out.println(path.toString());
 		    System.out.println(path.get(1));
 			aModule.drive(delta);
 
 		}
 		
+		void applyLeftTurn(WorldSpatial.Direction orientation, float delta) {
+			switch(orientation){
+			case EAST:
+				if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
+					turnLeft(delta);
+				}
+				break;
+			case NORTH:
+				if(!getOrientation().equals(WorldSpatial.Direction.WEST)){
+					turnLeft(delta);
+				}
+				break;
+			case SOUTH:
+				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
+					turnLeft(delta);
+				}
+				break;
+			case WEST:
+				if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)){
+					turnLeft(delta);
+				}
+				break;
+			default:
+				break;
+			
+			}
+			
+		}
 		
+		/**
+		 * Turn the car clock wise (think of a compass going clock-wise)
+		 */
+		void applyRightTurn(WorldSpatial.Direction orientation, float delta) {
+			switch(orientation){
+			case EAST:
+				if(!getOrientation().equals(WorldSpatial.Direction.SOUTH)){
+					turnRight(delta);
+				}
+				break;
+			case NORTH:
+				if(!getOrientation().equals(WorldSpatial.Direction.EAST)){
+					turnRight(delta);
+				}
+				break;
+			case SOUTH:
+				if(!getOrientation().equals(WorldSpatial.Direction.WEST)){
+					turnRight(delta);
+				}
+				break;
+			case WEST:
+				if(!getOrientation().equals(WorldSpatial.Direction.NORTH)){
+					turnRight(delta);
+				}
+				break;
+			default:
+				break;
+			
+			}
+			
+		}
 
 		public PerceptionModule getPModule() {
 			// TODO Auto-generated method stub

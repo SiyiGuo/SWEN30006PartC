@@ -1,7 +1,9 @@
 package mycontroller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
@@ -10,29 +12,53 @@ public class ActionModule {
 	private Car car;
 	private MyAIController controller;
 	private ArrayList<Coordinate> path; 
-	private float maxSpeed = (float) 1.4;
-	
+	private float maxSpeed = (float) 1.6;
+	private float wallSensitivity = (float) 0.6;
 	private int bug = 0;
-	
 	public ActionModule(MyAIController controller, Car car) {
 		this.car = car;
 		this.controller = controller;
 	}
 	
 	public void drive(float delta) {
-        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.SOUTH));
-        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.NORTH));
-        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.EAST));
-        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.WEST));
+		System.out.println(this.car.getX());
+		System.out.println(this.car.getY());
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.SOUTH)); //270
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.NORTH)); // 90
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.EAST)); // 0
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.WEST)); // 180
 		path = this.controller.getPath();
 		Coordinate next = path.get(1);
 		Coordinate currentPosition = new Coordinate(controller.getPosition());
 		WorldSpatial.Direction myDirection = controller.getOrientation();
-		int x = next.x-currentPosition.x;
-		int y = next.y-currentPosition.y;
-		if ((x == 0) && (y == 1)) {
+		int x = 0;
+		if (controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
+			x = Math.round(next.x-this.car.getX() + (float)0.3);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.WEST)){
+			x = Math.round(next.x-this.car.getX() - (float)0.3);
+		} else {
+			x = Math.round(next.x-this.car.getX());
+		}
+		int y = 0;
+		if (controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
+			y = Math.round(next.y-this.car.getY() + (float)0.3);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)){
+			y = Math.round(next.y-this.car.getY() - (float)0.3);
+		} else {
+			y = Math.round(next.y-this.car.getY());
+		}
+		
+		System.out.println(x);
+		System.out.println(y);
+		if ((x == 0) && (y > 0)) {
 			if (controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
-				
+
+				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
+				}
+				if(!checkLeftWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyRightTurn(this.controller.getOrientation(),delta);
+				}
 				if (controller.getSpeed() < maxSpeed) {
 					controller.applyForwardAcceleration();
 				}
@@ -40,162 +66,174 @@ public class ActionModule {
 			}
 			else {
 				controller.applyReverseAcceleration();
-				turnToDirection(controller.getOrientation(), delta, WorldSpatial.Direction.NORTH);
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.NORTH_DEGREE);
 			}
 		}
-		else if ((x == 0) && (y == -1)) {
+		else if ((x == 0) && (y < 0)) {
 			if(controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
-				
+
+				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
+				}
+				if(!checkLeftWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyRightTurn(this.controller.getOrientation(),delta);
+				}
 				if (controller.getSpeed() < maxSpeed) {
 					controller.applyForwardAcceleration();
 				}
 			} else {
 				controller.applyReverseAcceleration();
-				turnToDirection(controller.getOrientation(), delta, WorldSpatial.Direction.SOUTH);
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.SOUTH_DEGREE);
 			}
 		}
-		else if ((x == 1) && (y == 0)) {
+		else if ((x > 0) && (y == 0)) {
 			if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
-				
+
+				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
+				}
+				if(!checkLeftWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyRightTurn(this.controller.getOrientation(),delta);
+				}
 				if (controller.getSpeed() < maxSpeed) {
 					controller.applyForwardAcceleration();
 				}
 			} else {
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
 				controller.applyReverseAcceleration();
-				turnToDirection(controller.getOrientation(), delta, WorldSpatial.Direction.EAST);
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.EAST_DEGREE_MAX);
 			}
 		}		
-		else if ((x == -1) && (y == 0)) {
+		else if ((x < 0) && (y == 0)) {
 			if(controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
-				
+				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
+				}
+				if(!checkLeftWall(this.controller.getOrientation(),this.controller.getView())){
+					this.controller.applyRightTurn(this.controller.getOrientation(),delta);
+				}
 				if (controller.getSpeed() < maxSpeed) {
 					controller.applyForwardAcceleration();
 				}
 			} else {
-				controller.applyReverseAcceleration();
-				turnToDirection(controller.getOrientation(), delta, WorldSpatial.Direction.WEST);
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.WEST_DEGREE);
 				
+			}
+		}
+		
+	}
+	
+	
+	
+	private void turnToDirection(float f, float delta, int northDegree) {
+		System.out.println(northDegree);
+		if ((f != northDegree) ) {
+			
+			if ((f - northDegree) >= 0 ) {
+				System.out.println(f-northDegree);
+				if (Math.abs(f - northDegree) <= Math.abs(360 - f + northDegree)) {
+					
+					this.controller.turnLeft(2*delta);
+				} else {
+					this.controller.turnRight(2*delta);
+				}
+			} else {
+				if (Math.abs(northDegree-f) < Math.abs(360 + f - northDegree)) {
+					this.controller.turnRight(2*delta);
+				} else {
+					this.controller.turnLeft(2*delta);
+				}
 			}
 		}
 	}
 	
 	
-	
-	private void turnToDirection(WorldSpatial.Direction orientation, float delta, WorldSpatial.Direction target) {
+	private boolean checkLeftWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView) {
 		
 		switch(orientation){
-		case SOUTH:
-//			controller.turnRight(delta);
-			System.out.println("going south");
-			switch(target) {
-			case NORTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case EAST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnLeft(delta);
-				}
-				break;
-			case WEST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			}
-			break;
 		case EAST:
-			System.out.println("i m east");
-			switch(target) {
-			case NORTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnLeft(delta);
-				}
-				break;
-			case SOUTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case WEST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			}
-			break;
-		case WEST:
-			System.out.println("i m west");
-			switch(target) {
-			case NORTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case EAST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case SOUTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnLeft(delta);
-				}
-				break;
-			}
-			break;
+			return checkNorth(currentView);
 		case NORTH:
-			System.out.println("i m north");
-			switch(target) {
-			case SOUTH:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case EAST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnRight(delta);
-				}
-				break;
-			case WEST:
-				if(!controller.getOrientation().equals(target)){
-					controller.turnLeft(delta);
-				}
-				break;
-			}
-			break;
+			return checkWest(currentView);
+		case SOUTH:
+			return checkEast(currentView);
+		case WEST:
+			return checkSouth(currentView);
 		default:
-			break;	
-		}	
+			return false;
+		}
+		
 	}
 	
-	private void turnLeftToDirection(WorldSpatial.Direction orientation, float delta) {
+	private boolean checkRightWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView) {
+		
 		switch(orientation){
-		case SOUTH:
-//			controller.turnRight(delta);
-			if(!controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)){
-				controller.turnLeft(delta);
-			}
-			break;
-		case EAST:
-			if(!controller.getOrientation().equals(WorldSpatial.Direction.EAST)){
-				controller.turnLeft(delta);
-			}
-			break;
 		case WEST:
-			
-			if(!controller.getOrientation().equals(WorldSpatial.Direction.WEST)){
-				controller.turnLeft(delta);
-			}
-			break;
+			return checkNorth(currentView);
+		case SOUTH:
+			return checkWest(currentView);
 		case NORTH:
-			if(!controller.getOrientation().equals(WorldSpatial.Direction.NORTH)){
-				controller.turnLeft(delta);
-			}
-			break;
+			return checkEast(currentView);
+		case EAST:
+			return checkSouth(currentView);
 		default:
-			break;	
-		}	
+			return false;
+		}
+		
 	}
+	
+	public boolean checkEast(HashMap<Coordinate, MapTile> currentView){
+		// Check tiles to my right
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkWest(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles to my left
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x-i, currentPosition.y));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkNorth(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles to towards the top
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y+i));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkSouth(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles towards the bottom
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y-i));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 }
