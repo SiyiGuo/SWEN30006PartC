@@ -55,39 +55,29 @@ public class ActionModule {
 		Direction direction = this.getDirection(x_dir, y_dir);
 		System.out.println(String.format("x_dir:%s, y_dir:%s", x_dir, y_dir));
 		
+		if (currentDirection.equals(direction)) {
+			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+		} else {
+			this.turn(delta, direction);
+		}		
+	}
+	
+	private void turn(float delta, Direction direction) {
 		switch (direction) {
 		case EAST:
-			if(currentDirection.equals(WorldSpatial.Direction.EAST)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
-			} else {
-				this.TurningModule.turn(this.car.getAngle(), delta, WorldSpatial.EAST_DEGREE_MAX);
-			}
+			this.TurningModule.turn(delta, WorldSpatial.EAST_DEGREE_MAX);
 			break;
 		case NORTH:
-			if (currentDirection.equals(WorldSpatial.Direction.NORTH)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
-			}
-			else {
-				this.TurningModule.turn(this.car.getAngle(), delta, WorldSpatial.NORTH_DEGREE);
-			}
+			this.TurningModule.turn(delta, WorldSpatial.NORTH_DEGREE);
 			break;
 		case SOUTH:
-			if(currentDirection.equals(WorldSpatial.Direction.SOUTH)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
-			} else {
-				this.TurningModule.turn(this.car.getAngle(), delta, WorldSpatial.SOUTH_DEGREE);
-			}
+			this.TurningModule.turn(delta, WorldSpatial.SOUTH_DEGREE);
 			break;
 		case WEST:
-			if(currentDirection.equals(WorldSpatial.Direction.WEST)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
-			} else {
-				this.TurningModule.turn(this.car.getAngle(), delta, WorldSpatial.WEST_DEGREE);
-			}
+			this.TurningModule.turn(delta, WorldSpatial.WEST_DEGREE);
 		default:
 			break;
 		}
-		
 	}
 	
 	

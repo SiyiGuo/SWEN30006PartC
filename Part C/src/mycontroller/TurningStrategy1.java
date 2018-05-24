@@ -8,24 +8,24 @@ public class TurningStrategy1 implements TurningStrategy{
 		this.car = car;
 	}
 	
-	public void turn(float angle, float delta, int northDegree) {
+	@Override
+	public void turn(float delta, int absoluteDegree) {
 		this.car.applyReverseAcceleration();
-		this.turnToDirection(angle, delta, northDegree);
-		
+		this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
 	}
 	
-	private void turnToDirection(float f, float delta, int northDegree) {
-		System.out.println(northDegree);
-		if ((f != northDegree)) {
-			if ((f - northDegree) >= 0 ) {
-				System.out.println(f-northDegree);
-				if (Math.abs(f - northDegree) <= Math.abs(360 - f + northDegree)) {
+	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
+		System.out.println(absoluteDegree);
+		if ((currentDegree != absoluteDegree)) {
+			if ((currentDegree - absoluteDegree) >= 0 ) {
+				System.out.println(currentDegree-absoluteDegree);
+				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {
 					this.car.turnLeft(2*delta);
 				} else {
 					this.car.turnRight(2*delta);
 				}
 			} else {
-				if (Math.abs(northDegree-f) < Math.abs(360 + f - northDegree)) {
+				if (Math.abs(absoluteDegree-currentDegree) < Math.abs(360 + currentDegree - absoluteDegree)) {
 					this.car.turnRight(2*delta);
 				} else {
 					this.car.turnLeft(2*delta);

@@ -8,6 +8,7 @@ public class StraightLineStrategy1 implements StraightLineStrategy{
 		this.car = car;
 	}
 	
+	@Override
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
 		float maxSpeed = (float) 5;
 		
