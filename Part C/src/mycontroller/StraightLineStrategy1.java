@@ -9,7 +9,7 @@ public class StraightLineStrategy1 implements StraightLineStrategy{
 	}
 	
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
-		float maxSpeed = (float) 1.6;
+		float maxSpeed = (float) 5;
 		
 		if (this.car.getSpeed() < maxSpeed) {
 			this.car.applyForwardAcceleration();

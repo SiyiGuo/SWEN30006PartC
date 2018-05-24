@@ -20,7 +20,6 @@ public class TurningStrategy1 implements TurningStrategy{
 			if ((f - northDegree) >= 0 ) {
 				System.out.println(f-northDegree);
 				if (Math.abs(f - northDegree) <= Math.abs(360 - f + northDegree)) {
-					
 					this.car.turnLeft(2*delta);
 				} else {
 					this.car.turnRight(2*delta);
