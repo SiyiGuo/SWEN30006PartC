@@ -55,12 +55,10 @@ public class ActionModule {
 		WorldSpatial.Direction currentDirection = this.car.getOrientation();
 		System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
 							accurate_x, accurate_y));
-		System.out.println(this.car.getAngle());
 			    
 		float x_dir = nextPos.x-accurate_x;
 		float y_dir = nextPos.y-accurate_y;
 		Direction direction = this.getDirection(x_dir, y_dir);
-		System.out.println(String.format("x_dir:%s, y_dir:%s", x_dir, y_dir));
 		
 		if (currentDirection.equals(direction)) {
 			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
@@ -85,7 +83,33 @@ public class ActionModule {
 			else {
 				return false;
 			}
-
+		case EAST:
+			if (nextPos.x > now_x) {
+				System.out.println(nextPos.x);
+				System.out.println(now_x);
+				return true;
+			}
+			else {
+				return false;
+			}
+		case NORTH:
+			if (nextPos.y > now_y) {
+				System.out.println(nextPos.y);
+				System.out.println(now_y);
+				return true;
+			}
+			else {
+				return false;
+			}
+		case SOUTH:
+			if (nextPos.y < now_y) {
+				System.out.println(nextPos.y);
+				System.out.println(now_y);
+				return true;
+			}
+			else {
+				return false;
+			}
 		default:
 			return false;
 		}
