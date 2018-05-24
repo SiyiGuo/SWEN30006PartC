@@ -12,24 +12,30 @@ public class ActionModule {
 	
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
-
+	private Direction lastStraightLineDirection;
+	
 	public ActionModule(Car car) {
 		this.car = car;
 		this.StraightLineModule = new StraightLineStrategy1(this.car);
 		this.TurningModule = new TurningStrategy1(this.car);
 	}
 	
-	Direction getDirection(int x_dir, int y_dir) {
-		if ((x_dir == 0 & y_dir > 0)) {
+	Direction getDirection(float x_dir, float y_dir) {
+		float offset = (float)0;
+		
+		float x_offset = Math.abs(x_dir - Math.round(x_dir));
+		float y_offset = Math.abs(y_dir - Math.round(y_dir));
+		
+		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
 			return Direction.NORTH;
 		} 
-		else if ((x_dir > 0) && (y_dir == 0)){
+		else if ((x_dir > 0) && (Math.round(y_dir) == 0)){
 			return Direction.EAST;
 		}
-		else if ((x_dir == 0) && (y_dir < 0)) {
+		else if ((Math.round(x_dir) == 0) && (y_dir< 0)) {
 			return Direction.SOUTH;
 		}
-		else if ((x_dir < 0) && (y_dir == 0)) {
+		else if ((x_dir < 0) && (Math.round(y_dir) == 0)) {
 			return Direction.WEST;
 		}
 		else {
@@ -41,7 +47,7 @@ public class ActionModule {
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
-		
+		System.out.println(delta);
 		Coordinate nextPos = path.get(1);
 		Coordinate currentPos = new Coordinate(this.car.getPosition());
 		float accurate_x = this.car.getX();
@@ -49,19 +55,41 @@ public class ActionModule {
 		WorldSpatial.Direction currentDirection = this.car.getOrientation();
 		System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
 							accurate_x, accurate_y));
+		System.out.println(this.car.getAngle());
 			    
-		int x_dir = nextPos.x-currentPos.x;
-		int y_dir = nextPos.y-currentPos.y;
+		float x_dir = nextPos.x-accurate_x;
+		float y_dir = nextPos.y-accurate_y;
 		Direction direction = this.getDirection(x_dir, y_dir);
 		System.out.println(String.format("x_dir:%s, y_dir:%s", x_dir, y_dir));
 		
 		if (currentDirection.equals(direction)) {
 			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+			this.lastStraightLineDirection = direction;
 		} else {
-			this.turn(delta, direction);
+			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
+				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
+			} else {
+				this.turn(delta, direction);
+			}
 		}		
 	}
-	
+	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos) {
+		switch (lastDirection ) {
+
+		case WEST:
+			if (nextPos.x < now_x) {
+				System.out.println(nextPos.x);
+				System.out.println(now_x);
+				return true;
+			}
+			else {
+				return false;
+			}
+
+		default:
+			return false;
+		}
+	}
 	private void turn(float delta, Direction direction) {
 		switch (direction) {
 		case EAST:
