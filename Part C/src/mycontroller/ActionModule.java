@@ -12,7 +12,7 @@ public class ActionModule {
 	private Car car;
 	private MyAIController controller;
 	private ArrayList<Coordinate> path; 
-	private float maxSpeed = (float) 1.6;
+	private float maxSpeed = (float) 2;
 	private float wallSensitivity = (float) 0.6;
 	private int bug = 0;
 	public ActionModule(MyAIController controller, Car car) {
