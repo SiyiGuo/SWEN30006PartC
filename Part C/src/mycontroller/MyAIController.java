@@ -37,10 +37,9 @@ public class MyAIController extends CarController{
 			
 			// Gets what the car can see
 			pModule.update(); 
-			
+
 			// Deciding the path
 		    path = dModule.generatePath();
-		    
 		    // Move
 			aModule.drive(delta, path);
 
