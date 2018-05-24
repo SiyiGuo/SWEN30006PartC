@@ -15,7 +15,6 @@ public class ActionModule {
 	private float maxSpeed = (float) 1.6;
 	private float wallSensitivity = (float) 0.6;
 	private int bug = 0;
-	int x = 0;
 	public ActionModule(MyAIController controller, Car car) {
 		this.car = car;
 		this.controller = controller;
@@ -32,13 +31,27 @@ public class ActionModule {
 		Coordinate next = path.get(1);
 		Coordinate currentPosition = new Coordinate(controller.getPosition());
 		WorldSpatial.Direction myDirection = controller.getOrientation();
-		int x = Math.round(next.x-this.car.getX() - (float)0.3);
-		int y = Math.round(next.y-this.car.getY() - (float)0.3);
+		int x = 0;
+		if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
+			x += Math.round(next.x-this.car.getX() + (float)0.3);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
+			x += Math.round(next.x-this.car.getX() - (float)0.3);
+		} else {
+			x += Math.round(next.x-this.car.getX());
+		}
+		
+		int y = 0;
+		if(controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
+			y += Math.round(next.y-this.car.getY() + (float)0.3);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
+			y += Math.round(next.y-this.car.getY() - (float)0.3);
+		} else {
+			y += Math.round(next.y-this.car.getY());
+		}
 		System.out.println(x);
 		System.out.println(y);
 		if ((x == 0) && (y == 1)) {
 			if (controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
-				this.x = 0;
 				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
 					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
 				}
@@ -57,7 +70,7 @@ public class ActionModule {
 		}
 		else if ((x == 0) && (y == -1)) {
 			if(controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
-				this.x = 0;
+
 				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
 					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
 				}
@@ -74,7 +87,7 @@ public class ActionModule {
 		}
 		else if ((x == 1) && (y == 0)) {
 			if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
-				this.x = 0;
+
 				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
 					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
 				}
@@ -93,7 +106,7 @@ public class ActionModule {
 			}
 		}		
 		else if ((x == -1) && (y == 0)) {
-			this.x = 0;
+
 			if(controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
 				if(!checkRightWall(this.controller.getOrientation(),this.controller.getView())){
 					this.controller.applyLeftTurn(this.controller.getOrientation(),delta);
