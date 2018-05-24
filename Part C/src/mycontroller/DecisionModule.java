@@ -78,13 +78,6 @@ public class DecisionModule {
 							path.remove(j);
 						}
 					}
-					for (int j = path.size() - 2; j > 0; j--) {
-						Coordinate next = path.get(j + 1);
-						Coordinate previous = path.get(j - 1);
-						if (next.x == previous.x || next.y == previous.y) {
-							path.remove(j);
-						}
-					}
 					this.positionWhenLastFindPath = currentPosition;
 					this.lastPath = new ArrayList<Coordinate>(path);
 					return path;
