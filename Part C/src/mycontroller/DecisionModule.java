@@ -73,6 +73,18 @@ public class DecisionModule {
 			for (int i = 0; i < neighbours.length; i++) {
 				if (destinations.contains(neighbours[i])) {
 					path.add(neighbours[i]);
+					for (int j = path.size() - 1; j > 0; j--) {
+						if (path.get(j).equals(path.get(j - 1))) {
+							path.remove(j);
+						}
+					}
+					for (int j = path.size() - 2; j > 0; j--) {
+						Coordinate next = path.get(j + 1);
+						Coordinate previous = path.get(j - 1);
+						if (next.x == previous.x || next.y == previous.y) {
+							path.remove(j);
+						}
+					}
 					this.positionWhenLastFindPath = currentPosition;
 					this.lastPath = new ArrayList<Coordinate>(path);
 					return path;
