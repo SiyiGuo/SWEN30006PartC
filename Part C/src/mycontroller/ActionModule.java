@@ -68,12 +68,13 @@ public class ActionModule {
 			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 			this.lastStraightLineDirection = direction;
 		} else {
-			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
-				System.out.println("pass");
-			} else {
-				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
-				this.turn(delta, direction);
-			}
+			this.turn(delta, direction);
+//			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
+//				System.out.println("pass");
+//			} else {
+//				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
+//				
+//			}
 		}		
 	}
 	
