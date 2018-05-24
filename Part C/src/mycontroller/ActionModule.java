@@ -1,7 +1,10 @@
 package mycontroller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
@@ -13,6 +16,7 @@ public class ActionModule {
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
+	public enum TurnDirection {LEFT, RIGHT, INVERSE};
 	
 	public ActionModule(Car car) {
 		this.car = car;
@@ -64,47 +68,106 @@ public class ActionModule {
 			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 			this.lastStraightLineDirection = direction;
 		} else {
-			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
-				this.car.applyReverseAcceleration();
+			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
+				System.out.println("pass");
 			} else {
+				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
 				this.turn(delta, direction);
 			}
 		}		
 	}
-	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos) {
-		switch (lastDirection ) {
-
+	
+	private TurnDirection leftOrRight(Direction lastDirection, Direction nextDirection) {
+		switch (lastDirection) {
 		case WEST:
-			if (nextPos.x < now_x) {
-				System.out.println(nextPos.x);
-				System.out.println(now_x);
-				return true;
+			switch (nextDirection) {
+			case NORTH:
+				return TurnDirection.RIGHT;
+			case SOUTH:
+				return TurnDirection.LEFT;
+			default:
+				return TurnDirection.INVERSE;
 			}
-			else {
-				return false;
+		case SOUTH:
+			switch (nextDirection) {
+			case EAST:
+				return TurnDirection.LEFT;
+			case WEST:
+				return TurnDirection.RIGHT;
+			default:
+				return TurnDirection.INVERSE;
 			}
 		case EAST:
-			if (nextPos.x > now_x) {
-				System.out.println(nextPos.x);
-				System.out.println(now_x);
-				return true;
+			switch (nextDirection) {
+			case NORTH:
+				return TurnDirection.LEFT;
+			case SOUTH:
+				return TurnDirection.RIGHT;
+			default:
+				return TurnDirection.INVERSE;
 			}
-			else {
+		case NORTH:
+			switch (nextDirection) {
+			case EAST:
+				return TurnDirection.RIGHT;
+			case WEST:
+				return TurnDirection.LEFT;
+			default:
+				return TurnDirection.INVERSE;
+			}
+		default:
+			return TurnDirection.INVERSE;
+		}
+	}
+	
+	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos, Direction nextDirection) {
+		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
+		TurnDirection turnDirection = this.leftOrRight(lastDirection, nextDirection);
+		System.out.println(turnDirection);
+		System.out.println(lastDirection);
+		System.out.println(nextDirection);
+		
+		float offset = (float) 0.1;
+		
+
+		switch (lastDirection ) {
+		case WEST:
+			switch (turnDirection) {
+			case RIGHT:
+				System.out.println("Turning right");
+				Coordinate rightWall = new Coordinate((nextPos.x+1)+","+(nextPos.y));				
+				if (aroundView.get(rightWall).isType(MapTile.Type.WALL)){
+					System.out.println("Turning right2");
+					if (nextPos.x + offset < now_x) {
+						System.out.println("Turning right3");
+						this.car.applyReverseAcceleration();
+						System.out.println(String.format("%s, %s", nextPos.x, now_x));						
+						return true;
+					}
+				}
+			default:
 				return false;
 			}
 		case NORTH:
-			if (nextPos.y > now_y) {
-				System.out.println(nextPos.y);
-				System.out.println(now_y);
-				return true;
-			}
-			else {
+			switch (turnDirection) {
+			case RIGHT:
+				Coordinate rightWall = new Coordinate((nextPos.x)+","+(nextPos.y-1));				
+				if (aroundView.get(rightWall).isType(MapTile.Type.WALL)){
+					System.out.println("Turning right2");
+					if (nextPos.y-offset > now_y) {
+						System.out.println("Turning right3");
+						this.car.applyReverseAcceleration();
+						return true;
+					}
+				}
+			default:
 				return false;
 			}
 		default:
 			return false;
 		}
 	}
+	
 	private void turn(float delta, Direction direction) {
 		switch (direction) {
 		case EAST:
