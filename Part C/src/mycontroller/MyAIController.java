@@ -40,13 +40,13 @@ public class MyAIController extends CarController{
 
 			// Deciding the path
 		    path = dModule.generatePath();
+		    
 		    // Move
 			aModule.drive(delta, path);
 
 		}
 		
 		public PerceptionModule getPModule() {
-			// TODO Auto-generated method stub
 			return this.pModule;
 		}
 		
