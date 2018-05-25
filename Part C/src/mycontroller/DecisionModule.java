@@ -55,6 +55,9 @@ public class DecisionModule {
 		path = new ArrayList<Coordinate>();
 		traversed = new ArrayList<Coordinate>();
 		path.add(currentPosition);
+		if (destinations.contains(currentPosition)) {
+			return path;
+		}
 		traversed.add(currentPosition);
 		
 		paths.add(path);

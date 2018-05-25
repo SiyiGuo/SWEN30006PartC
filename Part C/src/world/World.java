@@ -111,6 +111,7 @@ public class World {
 								newTile = new MapTile(MapTile.Type.START);
 								assert(null == start);
 								carStart = new Coordinate(x, y);
+//								carStart = new Coordinate(10, 15);
 								start = newCoord;
 								// System.out.println("World Start - Coord: "+World.getStart());
 							}

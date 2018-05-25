@@ -2,154 +2,227 @@ package mycontroller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import tiles.MapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
-import world.WorldSpatial.Direction;
 
 public class ActionModule {
 	private Car car;
-	
-	private StraightLineStrategy StraightLineModule;
-	private TurningStrategy TurningModule;
-	private Direction lastStraightLineDirection;
-	public enum WallPosition {FRONT, BACK,  NOWALL};
-	
-	public ActionModule(Car car) {
+	private MyAIController controller;
+	private ArrayList<Coordinate> path; 
+	private float maxSpeed = (float)5;
+	private float wallSensitivity = (float) 0.6;
+
+	public ActionModule(MyAIController controller, Car car) {
 		this.car = car;
-		this.StraightLineModule = new StraightLineStrategy1(this.car);
-		this.TurningModule = new TurningStrategy1(this.car);
+		this.controller = controller;
 	}
 	
-	Direction getDirection(float x_dir, float y_dir) {
-		float offset = (float)0;
-		
-		float x_offset = Math.abs(x_dir - Math.round(x_dir));
-		float y_offset = Math.abs(y_dir - Math.round(y_dir));
-		
-		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
-			return Direction.NORTH;
-		} 
-		else if ((x_dir > 0) && (Math.round(y_dir) == 0)){
-			return Direction.EAST;
+	public void drive(float delta) {
+		System.out.println(this.car.getX());
+		System.out.println(this.car.getY());
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.SOUTH)); //270
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.NORTH)); // 90
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.EAST)); // 0
+//        System.out.println(controller.getOrientation().compareTo(WorldSpatial.Direction.WEST)); // 180
+		path = this.controller.getPath();
+		Coordinate next = path.get(0);
+		if (path.size() > 1) {
+			next = path.get(1);
 		}
-		else if ((Math.round(x_dir) == 0) && (y_dir< 0)) {
-			return Direction.SOUTH;
-		}
-		else if ((x_dir < 0) && (Math.round(y_dir) == 0)) {
-			return Direction.WEST;
-		}
-		else {
-			System.out.println(String.format("%s, %s", x_dir, y_dir));
-			System.out.println("exception case");
-			return null;
-		}
+		Coordinate currentPosition = new Coordinate(controller.getPosition());
+		WorldSpatial.Direction myDirection = controller.getOrientation();
 		
-	}
-	
-	public void drive(float delta, ArrayList<Coordinate> path) {
-		System.out.println(delta);
-		Coordinate nextPos = path.get(1);
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		float accurate_x = this.car.getX();
-		float accurate_y = this.car.getY();
-		WorldSpatial.Direction currentDirection = this.car.getOrientation();
-		System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
-							accurate_x, accurate_y));
-			    
-		float x_dir = nextPos.x-accurate_x;
-		float y_dir = nextPos.y-accurate_y;
-		Direction direction = this.getDirection(x_dir, y_dir);
+		float offset = (float) (0.2);
 		
-		if (currentDirection.equals(direction)) {
-			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
-			this.lastStraightLineDirection = direction;
+		int x = 0;
+		if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
+			x += Math.round(next.x-this.car.getX() - offset);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
+			x += Math.round(next.x-this.car.getX() + offset);
 		} else {
-			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
-				System.out.println("pass");
-			} else {
-				this.turn(delta, direction);
-				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
+			x += Math.round(next.x-this.car.getX());
+		}
+		
+		int y = 0;
+		if(controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
+			y += Math.round(next.y-this.car.getY() + offset);
+		} else if (controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
+			y += Math.round(next.y-this.car.getY() - offset);
+		} else {
+			y += Math.round(next.y-this.car.getY());
+		}
+		System.out.println(x);
+		System.out.println(y);
+		if ((x == 0) && (y > 0)) {
+			if (controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
+
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+				
 			}
-		}		 
+			else {
+				controller.applyReverseAcceleration();
+//				controller.applyBrake();
+//				controller.applyForwardAcceleration();
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.NORTH_DEGREE);
+			}
+		}
+		else if ((x == 0) && (y < 0)) {
+			if(controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
+
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+			} else {
+				controller.applyReverseAcceleration();
+//				controller.applyBrake();
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.SOUTH_DEGREE);
+			}
+		}
+		else if ((x > 0) && (y == 0)) {
+			if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
+
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+			} else {
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+				controller.applyReverseAcceleration();
+//				controller.applyBrake();
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.EAST_DEGREE_MAX);
+			}
+		}		
+		else if ((x < 0) && (y == 0)) {
+
+			if(controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
+
+				if (controller.getSpeed() < maxSpeed) {
+					controller.applyForwardAcceleration();
+				}
+			} else {
+				controller.applyReverseAcceleration();
+//				controller.applyBrake();
+				turnToDirection(controller.getAngle(), delta, WorldSpatial.WEST_DEGREE);
+				
+			}
+		}
+		
 	}
 	
 	
-	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos, Direction nextDirection) {
-		float offset = (float) 0.1;
+	
+	private void turnToDirection(float f, float delta, int northDegree) {
+		System.out.println(northDegree);
+		System.out.println(f);
+		float turnRate = 2f;
+		if ((Math.round(f) != northDegree)) {
+			
+			if ((f - northDegree) >= 0 ) {
+				System.out.println(f-northDegree);
+				if (Math.abs(f - northDegree) <= Math.abs(360 - f + northDegree)) {
+					
+					this.controller.turnLeft(turnRate*delta);
+				} else {
+					this.controller.turnRight(turnRate*delta);
+				}
+			} else {
+				if (Math.abs(northDegree-f) < Math.abs(360 + f - northDegree)) {
+					this.controller.turnRight(turnRate*delta);
+				} else {
+					this.controller.turnLeft(turnRate*delta);
+				}
+			}
+		} 
+	}
+	
+	
+	private boolean checkLeftWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView) {
 		
-		WallPosition wallDirection = this.detechWall(lastDirection, nextPos);
-		
-		switch (wallDirection) {
-		case BACK:
-			this.car.applyReverseAcceleration();
-			return true;
+		switch(orientation){
+		case EAST:
+			return checkNorth(currentView);
+		case NORTH:
+			return checkWest(currentView);
+		case SOUTH:
+			return checkEast(currentView);
+		case WEST:
+			return checkSouth(currentView);
 		default:
 			return false;
 		}
+		
 	}
 	
-	private WallPosition detechWall(Direction lastDirection, Coordinate nextPos) {
-		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
-		int back_check;
-		int front_check;
-		System.out.println(lastDirection);
-		switch (lastDirection) {
-		case EAST:
-			//case the car comes from WEST to EAST 
-			// ----->
-			back_check = nextPos.x - 1;
-			front_check = nextPos.x + 1;
-			for (Coordinate key:aroundView.keySet()) {
-				if ((key.x == back_check) && aroundView.get(key).isType(MapTile.Type.WALL)) {
-					return WallPosition.BACK;
-				}
-				else if ((key.x == front_check) && aroundView.get(key).isType(MapTile.Type.WALL)){
-					return WallPosition.FRONT;
-				}
-			}
-			return WallPosition.NOWALL;
+	private boolean checkRightWall(WorldSpatial.Direction orientation, HashMap<Coordinate, MapTile> currentView) {
+		
+		switch(orientation){
 		case WEST:
-			//case the car comes from EAST to WEST
-			// <-------
-			back_check = nextPos.x + 1;
-			front_check = nextPos.x - 1;
-			for (Coordinate key:aroundView.keySet()) {
-				if ((key.x == back_check) && aroundView.get(key).isType(MapTile.Type.WALL)) {
-					return WallPosition.BACK;
-				}
-				else if ((key.x == front_check) && aroundView.get(key).isType(MapTile.Type.WALL)){
-					return WallPosition.FRONT;
-				}
-			}
-			return WallPosition.NOWALL;
-		default:
-			return WallPosition.NOWALL;
-		}
-	}
-	
-	private void turn(float delta, Direction direction) {
-		switch (direction) {
-		case EAST:
-			this.TurningModule.turn(delta, WorldSpatial.EAST_DEGREE_MAX);
-			break;
-		case NORTH:
-			this.TurningModule.turn(delta, WorldSpatial.NORTH_DEGREE);
-			break;
+			return checkNorth(currentView);
 		case SOUTH:
-			this.TurningModule.turn(delta, WorldSpatial.SOUTH_DEGREE);
-			break;
-		case WEST:
-			this.TurningModule.turn(delta, WorldSpatial.WEST_DEGREE);
+			return checkWest(currentView);
+		case NORTH:
+			return checkEast(currentView);
+		case EAST:
+			return checkSouth(currentView);
 		default:
-			break;
+			return false;
 		}
+		
 	}
 	
+	public boolean checkEast(HashMap<Coordinate, MapTile> currentView){
+		// Check tiles to my right
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	public boolean checkWest(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles to my left
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x-i, currentPosition.y));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkNorth(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles to towards the top
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y+i));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean checkSouth(HashMap<Coordinate,MapTile> currentView){
+		// Check tiles towards the bottom
+		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		for(int i = 0; i <= wallSensitivity; i++){
+			MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y-i));
+			if(tile.isType(MapTile.Type.WALL)){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	
 }
