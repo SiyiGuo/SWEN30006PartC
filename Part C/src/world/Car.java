@@ -83,9 +83,12 @@ public class Car extends Sprite{
 			setX(World.getCarStart().x);
 			setY(World.getCarStart().y);
 		}
-		CAR_WIDTH = (int) sprite.getWidth();
-		CAR_HEIGHT = (int) sprite.getHeight();
-
+		
+		CAR_WIDTH = (int) Math.min(sprite.getWidth(),sprite.getHeight());
+		CAR_HEIGHT = CAR_WIDTH;
+		
+		System.out.println(CAR_WIDTH);
+		System.out.println(CAR_HEIGHT);
 		this.currentOrientation = WorldSpatial.Direction.EAST;
 	}
 
@@ -334,7 +337,7 @@ public class Car extends Sprite{
 			float scalar = this.velocity.len() / MAX_REVERSE_SPEED;
 			this.velocity.scl(1/scalar);
 		}
-		else if (this.velocity.len() < EPSILON){
+		else if (this.velocity.len() < 2*EPSILON){
 			this.velocity.x = 0;
 			this.velocity.y = 0;
 			if(carDirection.equals(State.FORWARD)){
