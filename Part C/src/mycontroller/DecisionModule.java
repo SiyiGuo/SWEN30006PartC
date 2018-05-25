@@ -10,6 +10,7 @@ import world.Car;
 
 public class DecisionModule {
 	public enum Mode{SEARCHING, DESTINATION};
+	public static final String DONOTHING = "99,99";
 	
 	private Mode actionMode;
 	private Car car;
@@ -35,7 +36,17 @@ public class DecisionModule {
 		ArrayList<ArrayList<Coordinate>> paths;
 		ArrayList<Coordinate> traversed;
 		paths = new ArrayList<ArrayList<Coordinate>>();
+		MapTile currentTile = this.controller.getPModule().getKnownMap().get(currentPosition);
 		
+		if (currentTile.isType(MapTile.Type.TRAP)){
+			if (((TrapTile)currentTile).getTrap().equals("health")){
+				if (this.car.getHealth() < 90) {
+					path = new ArrayList<Coordinate>();
+					path.add(new Coordinate(DONOTHING));
+					return path;
+				}
+			}
+		}
 		if ((this.controller.getKey() == 1) || 
 			(this.controller.getPModule().getKeyMap().
 			 containsKey(this.controller.getKey() - 1))){
