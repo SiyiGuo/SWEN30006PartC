@@ -9,6 +9,7 @@ import tiles.TrapTile;
 import utilities.Coordinate; 
 import world.Car; 
 import world.WorldSpatial; 
+import world.WorldSpatial.Direction;
 
 public class MyAIController extends CarController{
 		// Offset used to differentiate between 0 and 360 degrees
@@ -43,6 +44,7 @@ public class MyAIController extends CarController{
 		    
 		    // Move
 			aModule.drive(delta, path);
+//		    aModule.turn(delta, Direction.NORTH);
 
 		}
 		

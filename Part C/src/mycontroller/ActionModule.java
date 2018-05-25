@@ -52,23 +52,30 @@ public class ActionModule {
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println(path);
-		Coordinate nextPos = path.get(1);
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		float accurate_x = this.car.getX();
-		float accurate_y = this.car.getY();
-		WorldSpatial.Direction currentDirection = this.car.getOrientation();
-		System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
-							accurate_x, accurate_y));
-			    
-		float x_dir = nextPos.x-accurate_x;
-		float y_dir = nextPos.y-accurate_y;
-		Direction direction = this.getDirection(x_dir, y_dir);
-		
-		if (currentDirection.equals(direction)) {
-			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+		if (path.size() == 1) {
+			System.out.println("Do MNothjing");
+			Coordinate currentPos = new Coordinate(this.car.getPosition());
+			System.out.println(currentPos);
+//			this.car.brake();
 		} else {
-			this.turn(delta, direction);
-		}		
+			Coordinate nextPos = path.get(1); //as 0th element in list is our position
+			Coordinate currentPos = new Coordinate(this.car.getPosition());
+			float accurate_x = this.car.getX();
+			float accurate_y = this.car.getY();
+			WorldSpatial.Direction currentDirection = this.car.getOrientation();
+			System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
+								accurate_x, accurate_y));
+				    
+			float x_dir = nextPos.x-accurate_x;
+			float y_dir = nextPos.y-accurate_y;
+			Direction direction = this.getDirection(x_dir, y_dir);
+			
+			if (currentDirection.equals(direction)) {
+				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+			} else {
+				this.turn(delta, direction);
+			}		
+		}	
 	}
 		
 	public void turn(float delta, Direction direction) {
