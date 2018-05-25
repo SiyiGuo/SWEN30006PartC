@@ -43,23 +43,44 @@ public class ActionModule {
 			for(int i = 0; i <= 3; i++){
 				MapTile tile = currentView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
 				if(tile.isType(MapTile.Type.WALL)){
-					x += Math.round(next.x-this.car.getX() - offset);
+					x = Math.round(next.x-this.car.getX() - offset);
 				} else {
-					x += Math.round(next.x-this.car.getX());
+					x = Math.round(next.x-this.car.getX());
 				}
 			} 
 			
 		} else if (controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
-			x += Math.round(next.x-this.car.getX() + offset);
+			for(int i = 0; i <= 3; i++){
+				MapTile tile = currentView.get(new Coordinate(currentPosition.x-i, currentPosition.y));
+				if(tile.isType(MapTile.Type.WALL)){
+					x = Math.round(next.x-this.car.getX() + offset);
+				} else {
+					x = Math.round(next.x-this.car.getX());
+				}
+			}
 		} else {
 			x += Math.round(next.x-this.car.getX());
 		}
 		
 		int y = 0;
 		if(controller.getOrientation().equals(WorldSpatial.Direction.NORTH)) {
-			y += Math.round(next.y-this.car.getY() + offset);
+			for(int i = 0; i <= 3; i++){
+				MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y+i));
+				if(tile.isType(MapTile.Type.WALL)){
+					y = Math.round(next.y-this.car.getY() - offset);
+				} else {
+					y = Math.round(next.y-this.car.getY() + offset);
+				}
+			}
 		} else if (controller.getOrientation().equals(WorldSpatial.Direction.SOUTH)) {
-			y += Math.round(next.y-this.car.getY() - offset);
+			for(int i = 0; i <= 3; i++){
+				MapTile tile = currentView.get(new Coordinate(currentPosition.x, currentPosition.y-i));
+				if(tile.isType(MapTile.Type.WALL)){
+					y = Math.round(next.y-this.car.getY() + offset);
+				} else {
+					y = Math.round(next.y-this.car.getY() - offset);
+				}
+			}
 		} else {
 			y += Math.round(next.y-this.car.getY());
 		}
