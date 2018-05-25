@@ -40,7 +40,7 @@ public class DecisionModule {
 		
 		if (currentTile.isType(MapTile.Type.TRAP)){
 			if (((TrapTile)currentTile).getTrap().equals("health")){
-				if (this.car.getHealth() < 90) {
+				if (this.car.getHealth() < 95) {
 					path = new ArrayList<Coordinate>();
 					path.add(new Coordinate(DONOTHING));
 					return path;
