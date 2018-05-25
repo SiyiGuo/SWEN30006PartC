@@ -16,7 +16,7 @@ public class ActionModule {
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
-	public enum TurnDirection {LEFT, RIGHT, INVERSE};
+	public enum WallPosition {FRONT, BACK,  NOWALL};
 	
 	public ActionModule(Car car) {
 		this.car = car;
@@ -66,105 +66,68 @@ public class ActionModule {
 		
 		if (currentDirection.equals(direction)) {
 			this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
-//			this.lastStraightLineDirection = direction;
+			this.lastStraightLineDirection = direction;
 		} else {
-			this.turn(delta, direction);
-//			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
-//				System.out.println("pass");
-//			} else {
-//				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
-//			}
-		}		
+			if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos, direction)) {
+				System.out.println("pass");
+			} else {
+				this.turn(delta, direction);
+				System.out.println(String.format("%s, %s", nextPos.x, accurate_x));
+			}
+		}		 
 	}
 	
-	private TurnDirection leftOrRight(Direction lastDirection, Direction nextDirection) {
-		switch (lastDirection) {
-		case WEST:
-			switch (nextDirection) {
-			case NORTH:
-				return TurnDirection.RIGHT;
-			case SOUTH:
-				return TurnDirection.LEFT;
-			default:
-				return TurnDirection.INVERSE;
-			}
-		case SOUTH:
-			switch (nextDirection) {
-			case EAST:
-				return TurnDirection.LEFT;
-			case WEST:
-				return TurnDirection.RIGHT;
-			default:
-				return TurnDirection.INVERSE;
-			}
-		case EAST:
-			switch (nextDirection) {
-			case NORTH:
-				return TurnDirection.LEFT;
-			case SOUTH:
-				return TurnDirection.RIGHT;
-			default:
-				return TurnDirection.INVERSE;
-			}
-		case NORTH:
-			switch (nextDirection) {
-			case EAST:
-				return TurnDirection.RIGHT;
-			case WEST:
-				return TurnDirection.LEFT;
-			default:
-				return TurnDirection.INVERSE;
-			}
+	
+	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos, Direction nextDirection) {
+		float offset = (float) 0.1;
+		
+		WallPosition wallDirection = this.detechWall(lastDirection, nextPos);
+		
+		switch (wallDirection) {
+		case BACK:
+			this.car.applyReverseAcceleration();
+			return true;
 		default:
-			return TurnDirection.INVERSE;
+			return false;
 		}
 	}
 	
-	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos, Direction nextDirection) {
+	private WallPosition detechWall(Direction lastDirection, Coordinate nextPos) {
 		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
-		TurnDirection turnDirection = this.leftOrRight(lastDirection, nextDirection);
-		System.out.println(turnDirection);
+		int back_check;
+		int front_check;
 		System.out.println(lastDirection);
-		System.out.println(nextDirection);
-		
-		float offset = (float) 0.1;
-		
-
-		switch (lastDirection ) {
+		switch (lastDirection) {
+		case EAST:
+			//case the car comes from WEST to EAST 
+			// ----->
+			back_check = nextPos.x - 1;
+			front_check = nextPos.x + 1;
+			for (Coordinate key:aroundView.keySet()) {
+				if ((key.x == back_check) && aroundView.get(key).isType(MapTile.Type.WALL)) {
+					return WallPosition.BACK;
+				}
+				else if ((key.x == front_check) && aroundView.get(key).isType(MapTile.Type.WALL)){
+					return WallPosition.FRONT;
+				}
+			}
+			return WallPosition.NOWALL;
 		case WEST:
-			switch (turnDirection) {
-			case RIGHT:
-				System.out.println("Turning right");
-				Coordinate rightWall = new Coordinate((nextPos.x+1)+","+(nextPos.y));				
-				if (aroundView.get(rightWall).isType(MapTile.Type.WALL)){
-					System.out.println("Turning right2");
-					if (nextPos.x + offset < now_x) {
-						System.out.println("Turning right3");
-						this.car.applyReverseAcceleration();
-						System.out.println(String.format("%s, %s", nextPos.x, now_x));						
-						return true;
-					}
+			//case the car comes from EAST to WEST
+			// <-------
+			back_check = nextPos.x + 1;
+			front_check = nextPos.x - 1;
+			for (Coordinate key:aroundView.keySet()) {
+				if ((key.x == back_check) && aroundView.get(key).isType(MapTile.Type.WALL)) {
+					return WallPosition.BACK;
 				}
-			default:
-				return false;
-			}
-		case NORTH:
-			switch (turnDirection) {
-			case RIGHT:
-				Coordinate rightWall = new Coordinate((nextPos.x)+","+(nextPos.y-1));				
-				if (aroundView.get(rightWall).isType(MapTile.Type.WALL)){
-					System.out.println("Turning right2");
-					if (nextPos.y-offset > now_y) {
-						System.out.println("Turning right3");
-						this.car.applyReverseAcceleration();
-						return true;
-					}
+				else if ((key.x == front_check) && aroundView.get(key).isType(MapTile.Type.WALL)){
+					return WallPosition.FRONT;
 				}
-			default:
-				return false;
 			}
+			return WallPosition.NOWALL;
 		default:
-			return false;
+			return WallPosition.NOWALL;
 		}
 	}
 	
