@@ -51,7 +51,7 @@ public class ActionModule {
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
-		System.out.println(path);
+//		System.out.println(path);
 		if (path.size() == 1) {
 			if (path.get(0).toString().equals("99,99")) {
 				System.out.println("Do MNothjing");
@@ -75,12 +75,62 @@ public class ActionModule {
 			
 			if (currentDirection.equals(direction)) {
 				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+				this.lastStraightLineDirection = direction;
 			} else {
-				this.turn(delta, direction);
+				if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
+			        System.out.println("pass");
+			        this.car.applyReverseAcceleration();
+			      } else {
+			        this.turn(delta, direction);
+			      }
 			}		
 		}	
 	}
-		
+	
+	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos) {
+	    switch (lastDirection ) {
+	 
+	    case WEST:
+	      if (nextPos.x < now_x) {
+	        System.out.println(nextPos.x);
+	        System.out.println(now_x);
+	        return true;
+	      }
+	      else {
+	        return false;
+	      }
+	    case EAST:
+	      if (nextPos.x > now_x) {
+	        System.out.println(nextPos.x);
+	        System.out.println(now_x);
+	        return true;
+	      }
+	      else {
+	        return false;
+	      }
+	    case NORTH:
+	      if (nextPos.y > now_y) { 
+	        System.out.println(nextPos.y);
+	        System.out.println(now_y);
+	        return true;
+	      }
+	      else {
+	        return false;
+	      }
+	    case SOUTH:
+	        if (nextPos.y < now_y) {
+	          System.out.println(nextPos.y);
+	          System.out.println(now_y);
+	          return true;
+	        }
+	        else {
+	          return false;
+	        }
+	    default:
+	      return false;
+	    }
+	  }
+	
 	public void turn(float delta, Direction direction) {
 		int absoluteDegree = 0;
 		switch (direction) {
