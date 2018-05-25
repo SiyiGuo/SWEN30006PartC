@@ -34,12 +34,21 @@ public class ActionModule {
 		}
 		Coordinate currentPosition = new Coordinate(controller.getPosition());
 		WorldSpatial.Direction myDirection = controller.getOrientation();
-		
+		HashMap<Coordinate, MapTile> currentView = this.car.getView();
 		float offset = (float) (0.2);
 		
 		int x = 0;
 		if(controller.getOrientation().equals(WorldSpatial.Direction.EAST)) {
-			x += Math.round(next.x-this.car.getX() - offset);
+			
+			for(int i = 0; i <= 3; i++){
+				MapTile tile = currentView.get(new Coordinate(currentPosition.x+i, currentPosition.y));
+				if(tile.isType(MapTile.Type.WALL)){
+					x += Math.round(next.x-this.car.getX() - offset);
+				} else {
+					x += Math.round(next.x-this.car.getX());
+				}
+			} 
+			
 		} else if (controller.getOrientation().equals(WorldSpatial.Direction.WEST)) {
 			x += Math.round(next.x-this.car.getX() + offset);
 		} else {
