@@ -17,7 +17,7 @@ public class TurningStrategy2 implements TurningStrategy{
 		float turning_ratio = (float)1;
 		if ((currentDegree != absoluteDegree)) {
 			
-			if (this.car.getSpeed() > 0.2) {
+			if (this.car.getSpeed() > 0.1) {
 				this.car.brake();
 			} else {
 				this.car.applyReverseAcceleration();
