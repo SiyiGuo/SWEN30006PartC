@@ -2,9 +2,9 @@ package mycontroller;
 
 import world.Car;
 
-public class TurningStrategy1 implements TurningStrategy{
+public class TurningStrategy2 implements TurningStrategy{
 	private Car car;
-	public TurningStrategy1(Car car) {
+	public TurningStrategy2(Car car) {
 		this.car = car;
 	}
 	
@@ -14,10 +14,16 @@ public class TurningStrategy1 implements TurningStrategy{
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
-		float turning_ratio = (float)2;
+		float turning_ratio = (float)1;
 		if ((currentDegree != absoluteDegree)) {
 			
-			this.car.applyReverseAcceleration();
+			if (this.car.getSpeed() > 0.2) {
+				this.car.brake();
+			} else {
+				this.car.applyReverseAcceleration();
+			}
+			
+			
 			
 			if ((currentDegree - absoluteDegree) >= 0 ) {
 				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {

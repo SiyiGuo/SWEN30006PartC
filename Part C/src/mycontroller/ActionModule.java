@@ -21,7 +21,7 @@ public class ActionModule {
 	public ActionModule(Car car) {
 		this.car = car;
 		this.StraightLineModule = new StraightLineStrategy1(this.car);
-		this.TurningModule = new TurningStrategy1(this.car);
+		this.TurningModule = new TurningStrategy2(this.car);
 	}
 	
 	Direction getDirection(float x_dir, float y_dir) {
@@ -74,15 +74,41 @@ public class ActionModule {
 			Direction direction = this.getDirection(x_dir, y_dir);
 			
 			if (currentDirection.equals(direction)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
-				this.lastStraightLineDirection = direction;
+				//Case: on a Straight line
+				
+				//Detect future turn first
+				int count = 0;
+				Direction futureDirection = currentDirection;
+				for (Coordinate furutrePos:  path.subList(1, path.size())) {
+					if (count >= 2) {
+						break;
+					} else {
+						float next_x_dir = furutrePos.x-accurate_x;
+						float next_y_dir = furutrePos.y-accurate_y;
+						futureDirection = this.getDirection(next_x_dir, next_y_dir);
+						if (!currentDirection.equals(futureDirection)) {
+							if (count == 0) {
+								futureDirection = currentDirection;
+							}
+							break;
+						}
+						count += 1;
+						System.out.println(String.format("futurePos:%s, futureDirection:%s, currentDirection:%s", furutrePos, futureDirection, currentDirection));
+					}
+				}
+				
+				//If there is going to be a turn
+				if (!currentDirection.equals(futureDirection)) {
+					System.out.println("backward");
+					this.car.applyReverseAcceleration();
+				} else {
+					System.out.println("Move forward");
+					this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
+					this.lastStraightLineDirection = direction;
+				}
+				
 			} else {
-				if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
-			        System.out.println("pass");
-			        this.car.applyReverseAcceleration();
-			      } else {
 			        this.turn(delta, direction);
-			      }
 			}		
 		}	
 	}

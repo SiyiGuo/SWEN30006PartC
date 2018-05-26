@@ -43,8 +43,8 @@ public class MyAIController extends CarController{
 		    path = dModule.generatePath();
 		    
 		    // Move
-			aModule.drive(delta, path);
-//		    aModule.turn(delta, Direction.NORTH);
+//			aModule.drive(delta, path);
+		    aModule.turn(delta, Direction.WEST);
 
 		}
 		
