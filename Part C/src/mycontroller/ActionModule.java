@@ -100,7 +100,7 @@ public class ActionModule {
 
 				
 				//If there is going to be a turn
-				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.5) {
+				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.7) {
 					System.out.println("backward");
 					System.out.println(String.format("%s, %s", future_x_dir, future_y_dir));
 					this.car.applyReverseAcceleration();
