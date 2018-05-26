@@ -31,7 +31,9 @@ public class Route {
 	public int getCost() {
 		return this.cost;
 	}
-	
+	/**
+	 * this method add a new node to a route and updates its cost.
+	 */
 	public void addNode(Coordinate coor, int direction, HashMap<Coordinate, MapTile> knownMap) {
 		switch (this.path.size()) {
 		case(0):
@@ -40,9 +42,9 @@ public class Route {
 			break;
 		default:
 			Coordinate previousCoor = path.get(path.size() - 1);
-			Coordinate forwardCoor = getForwardCoor(coor, direction);
-			Coordinate twoTileBackCoor = trackByDir(coor, direction, 2);
-			Coordinate threeTileBackCoor = trackByDir(coor, direction, 3);
+			Coordinate forwardCoor = getForwardCoor(coor, direction, 1);
+			Coordinate backwardTwoCoor = getForwardCoor(coor, direction, -2);
+			Coordinate backwardThreeCoor = getForwardCoor(coor, direction, -3);
 			
 			this.path.add(coor);
 			cost++;
@@ -51,46 +53,40 @@ public class Route {
 				currentDirection = direction;
 				turning = true;
 			}
+			// turning incurs speed reducing, add cost.
 			if (turning) {
 				cost += 5;
+				// speed reducing can be deadly in a lava tile.
 				if (isLava(previousCoor, knownMap))
 					cost += 100;
 			}
+			
+			// entering lava incurs great cost
 			if (isLava(coor, knownMap)) {
 				cost += 15;
-				if (!path.contains(twoTileBackCoor)) {
+				
+				// track back the tile behind the car, if it is not in the route, the car
+				//  will be at a low speed, entering lava with low speed costs more health
+				if (!path.contains(backwardTwoCoor)) {
 					cost += 10;
 				}
-				if (!path.contains(threeTileBackCoor)) {
+				if (!path.contains(backwardThreeCoor)) {
 					cost += 5;
 				}
+				
+				// entering lava with a wall forward, means u can not speed up and leave,
+				// must turn or reverse to exit lava, can be slow and deadly
 				if (isWall(forwardCoor, knownMap))
 					cost += 100;
 			}
+			
+			// rewards for passing a health trap
 			if (isHealth(coor, knownMap)) {
 				cost -= 1;
 			}
 		}
 	}
-	public Coordinate trackByDir(Coordinate current, int dir, int distance) {
-		int backCoorX = current.x;
-		int backCoorY = current.y;
-		switch (dir) {
-		case (0):
-			backCoorX -= distance;
-			break;
-		case (1):
-			backCoorY -= distance;
-			break;
-		case (2):
-			backCoorX += distance;
-			break;
-		case (3):
-			backCoorY += distance;
-			break;
-		}
-		return new Coordinate(backCoorX + "," + backCoorY);
-	}
+	
 	
 	public static boolean isLava(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
 		if (!knownMap.containsKey(coor)) {
@@ -125,22 +121,25 @@ public class Route {
 		}else
 			return false;
 	}
-	
-	public Coordinate getForwardCoor(Coordinate current, int direction) {
+
+	/**
+	 * this method finds the coordinate of the tile behind the car by a certain distance
+	 */
+	public Coordinate getForwardCoor(Coordinate current, int direction, int distance) {
 		int x = current.x;
 		int y = current.y;
 		switch(direction) {
 		case 0:
-			x++;
+			x += distance;
 			break;
 		case 1:
-			y++;
+			y += distance;
 			break;
 		case 2:
-			x--;
+			x -= distance;
 			break;
 		case 3:
-			y--;
+			y -= distance;
 			break;			
 		}
 		return new Coordinate(x+","+y);

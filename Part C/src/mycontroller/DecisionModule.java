@@ -98,7 +98,6 @@ public class DecisionModule {
 				this.lastPath = new ArrayList<Coordinate>(route.getPath());
 				return processWithRecoverStrategy(route.getPath());
 			}
-			
 			Coordinate lastNodeWest = new Coordinate((lastNode.x - 1) + "," + lastNode.y);
 			Coordinate lastNodeEast = new Coordinate((lastNode.x + 1) + "," + lastNode.y);
 			Coordinate lastNodeNorth = new Coordinate(lastNode.x + "," + (lastNode.y + 1));
@@ -117,7 +116,7 @@ public class DecisionModule {
 							routeCopy.addNode(neighbours[i], i, this.controller.getKnownMap());
 							newPos = new Position(neighbours[i], i);
 							if (route.getCost() < costs.get(newPos)) {
-								costs.put(newPos, route.getCost());
+								costs.put(newPos, routeCopy.getCost());
 								routes = insertRoute(routes, routeCopy);
 							}
 						}

@@ -7,7 +7,8 @@ import utilities.Coordinate;
 public class Position {
 	Coordinate coor;
 	int direction;
-	 
+	
+	// position records in what direction does the car stayed in which coordinate
 	public Position(Coordinate coor, int dir) {
 		this.coor = coor;
 		this.direction = dir;
