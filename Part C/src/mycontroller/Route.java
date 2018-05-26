@@ -42,23 +42,9 @@ public class Route {
 		default:
 			Coordinate previousCoor = path.get(path.size() - 1);
 			Coordinate forwardCoor = getForwardCoor(coor, direction);
-			int twoTileBackCoorX = coor.x;
-			int twoTileBackCoorY = coor.y;
-			switch (direction) {
-			case (0):
-				twoTileBackCoorX -= 2;
-				break;
-			case (1):
-				twoTileBackCoorY -= 2;
-				break;
-			case (2):
-				twoTileBackCoorX += 2;
-				break;
-			case (3):
-				twoTileBackCoorY += 2;
-				break;
-			}
-			Coordinate twoTileBackCoor = new Coordinate(twoTileBackCoorX + "," + twoTileBackCoorY);
+			Coordinate twoTileBackCoor = trackByDir(coor, direction, 2);
+			Coordinate threeTileBackCoor = trackByDir(coor, direction, 3);
+			
 			this.path.add(coor);
 			cost++;
 			boolean turning = false;
@@ -72,8 +58,11 @@ public class Route {
 					cost += 100;
 			}
 			if (isLava(coor, knownMap)) {
-				cost += 10;
+				cost += 15;
 				if (!path.contains(twoTileBackCoor)) {
+					cost += 10;
+				}
+				if (!path.contains(threeTileBackCoor)) {
 					cost += 5;
 				}
 				if (isWall(forwardCoor, knownMap))
@@ -83,6 +72,25 @@ public class Route {
 				cost -= 1;
 			}
 		}
+	}
+	public Coordinate trackByDir(Coordinate current, int dir, int distance) {
+		int backCoorX = current.x;
+		int backCoorY = current.y;
+		switch (dir) {
+		case (0):
+			backCoorX -= distance;
+			break;
+		case (1):
+			backCoorY -= distance;
+			break;
+		case (2):
+			backCoorX += distance;
+			break;
+		case (3):
+			backCoorY += distance;
+			break;
+		}
+		return new Coordinate(backCoorX + "," + backCoorY);
 	}
 	
 	public static boolean isLava(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
