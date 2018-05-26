@@ -11,47 +11,51 @@ import world.Car;
 public class DecisionModule {
 	public enum Mode{SEARCHING, DESTINATION};
 	public static final String DONOTHING = "99,99";
+	public static final int LOWHEALTHTHRESHOLD = 20;
+	public static final int RECOVERTHRESHOLD = 90;
+	public static final float STOPTHRESHOLD = 1.5f;
+	public static final int EAST = 0;
+	public static final int NORTH = 1;
+	public static final int WEST = 2;
+	public static final int SOUTH = 3;
 	
-	private Mode actionMode;
 	private Car car;
 	private MyAIController controller;
 	private ArrayList<Coordinate> destinations;
-	private ArrayList<Coordinate> path;
 	private HashMap<Coordinate, MapTile> roadMap;
 	private Coordinate positionWhenLastFindPath;
 	private ArrayList<Coordinate> lastPath;
-	private float lastAngle;
 	
 	public DecisionModule(MyAIController controller, Car car) {
 		this.car = car;
 		this.controller = controller;
 		this.roadMap = controller.getMap();
 	}
-	
+	//reminder: health»ØÑª,
 	public ArrayList<Coordinate> generatePath() {
 		Coordinate currentPosition = new Coordinate(controller.getPosition());
+		int iniDirection = Math.round(car.getAngle() / 90) % 4;
 		
 		if (positionWhenLastFindPath != null && currentPosition.equals(positionWhenLastFindPath)) {
 			return lastPath;
 		}
-		ArrayList<ArrayList<Coordinate>> paths;
-		ArrayList<Coordinate> traversed;
-		paths = new ArrayList<ArrayList<Coordinate>>();
-		MapTile currentTile = this.controller.getPModule().getKnownMap().get(currentPosition);
 		
-		if (currentTile.isType(MapTile.Type.TRAP)){
-			if (((TrapTile)currentTile).getTrap().equals("health")){
-				if (this.car.getHealth() < 95) {
-					path = new ArrayList<Coordinate>();
-					path.add(new Coordinate(DONOTHING));
-					return path;
-				}
-			}
+		if (this.car.getHealth() < RECOVERTHRESHOLD && 
+			Route.isHealth(currentPosition, this.controller.getKnownMap())) {
+			ArrayList<Coordinate> path = new ArrayList<Coordinate>();
+			path.add(new Coordinate(DONOTHING));
+			return path;
 		}
-		if ((this.controller.getKey() == 1) || 
-			(this.controller.getPModule().getKeyMap().
-			 containsKey(this.controller.getKey() - 1))){
-			this.actionMode = Mode.DESTINATION;
+		
+		Route route;
+		ArrayList<Route> routes;
+		routes = new ArrayList<Route>();
+		
+		if (this.car.getHealth() < LOWHEALTHTHRESHOLD) {
+			this.destinations = this.controller.getPModule().getHealthTraps();
+		} else if ((this.controller.getKey() == 1) || 
+				   (this.controller.getPModule().getKeyMap().
+					containsKey(this.controller.getKey() - 1))){
 			if (this.controller.getKey() == 1) {
 				this.destinations = this.controller.getPModule().getExit();
 			} else {
@@ -59,66 +63,76 @@ public class DecisionModule {
 				this.destinations.add(this.controller.getPModule().getKeyMap().
 									  get(this.controller.getKey() - 1));
 			}
-		}else {
-			this.actionMode = Mode.SEARCHING;
+		} else {
 			this.destinations = this.controller.getPModule().getUnsearched();
 		}
 		
-		path = new ArrayList<Coordinate>();
-		traversed = new ArrayList<Coordinate>();
-		path.add(currentPosition);
-		if (destinations.contains(currentPosition)) {
-			return path;
-		}
-		traversed.add(currentPosition);
+		route = new Route(new ArrayList<Coordinate>(), 0, iniDirection);
+		route.addNode(currentPosition, iniDirection, this.controller.getKnownMap());
 		
-		paths.add(path);
-		while (!paths.isEmpty()) {
-			path = paths.remove(0);
-			
-			if (!paths.isEmpty() && (path.size() > paths.get(0).size())) {
-				paths.add(path);
-				continue;
-			}
+		if (destinations.contains(currentPosition)) {
+			return route.getPath();
+		}
+		
+		routes.add(route);
+		while (!routes.isEmpty()) {
+			route = routes.remove(0);
+			ArrayList<Coordinate> path = route.getPath();
 			Coordinate lastNode = path.get(path.size() - 1);
+			
+			if (destinations.contains(lastNode)) {
+				this.positionWhenLastFindPath = currentPosition;
+				this.lastPath = new ArrayList<Coordinate>(route.getPath());
+				return processWithRecoverStrategy(route.getPath());
+			}
+			
 			Coordinate lastNodeWest = new Coordinate((lastNode.x - 1) + "," + lastNode.y);
 			Coordinate lastNodeEast = new Coordinate((lastNode.x + 1) + "," + lastNode.y);
 			Coordinate lastNodeNorth = new Coordinate(lastNode.x + "," + (lastNode.y + 1));
 			Coordinate lastNodeSouth = new Coordinate(lastNode.x + "," + (lastNode.y - 1));
-			Coordinate[] neighbours = {lastNodeWest, lastNodeEast, lastNodeNorth, lastNodeSouth};
+			
+			Coordinate[] neighbours = {lastNodeEast, lastNodeNorth, lastNodeWest, lastNodeSouth};
 			for (int i = 0; i < neighbours.length; i++) {
-				if (destinations.contains(neighbours[i])) {
-					path.add(neighbours[i]);
-					for (int j = path.size() - 1; j > 0; j--) {
-						if (path.get(j).equals(path.get(j - 1))) {
-							path.remove(j);
-						}
-					}
-					this.positionWhenLastFindPath = currentPosition;
-					this.lastPath = new ArrayList<Coordinate>(path);
-					return path;
-				}
+
 				if (this.roadMap.containsKey(neighbours[i])) {
 					if ((this.roadMap.get(neighbours[i]).isType(MapTile.Type.ROAD)) ||
-							(this.roadMap.get(neighbours[i]).isType(MapTile.Type.FINISH)) ||
-							(this.roadMap.get(neighbours[i]).isType(MapTile.Type.START)) ||
+						(this.roadMap.get(neighbours[i]).isType(MapTile.Type.FINISH)) ||
+						(this.roadMap.get(neighbours[i]).isType(MapTile.Type.START)) ||
 						(this.roadMap.get(neighbours[i]).isType(MapTile.Type.TRAP))) {
-						if (!traversed.contains(neighbours[i])) {
-							ArrayList<Coordinate> pathcopy = new ArrayList<Coordinate>(path);
-							pathcopy.add(neighbours[i]);
-							traversed.add(neighbours[i]);
-							MapTile neighbour = this.controller.getPModule().getKnownMap().
-												get(neighbours[i]);
-							if (neighbour.isType(MapTile.Type.TRAP) && 
-								((TrapTile)neighbour).getTrap().equals("lava")) {
-								pathcopy.add(neighbours[i]);
-							}
-							paths.add(pathcopy);
+						if (!path.contains(neighbours[i])) {
+							Route routeCopy = new Route(route);
+							routeCopy.addNode(neighbours[i], i, this.controller.getKnownMap());
+							routes = insertRoute(routes, routeCopy);
 						}
 					}
 				}
 			}
 		}
 		return null;
+	}
+	
+	public ArrayList<Route> insertRoute(ArrayList<Route> routes, Route route) {
+		for (int i = 0; i < routes.size() - 1; i++) {
+			if (route.getCost() < routes.get(i).getCost()) {
+				routes.add(i, route);
+				return routes;
+			}
+		}
+		routes.add(route);
+		return routes;
+	}
+	
+	public ArrayList<Coordinate> processWithRecoverStrategy(ArrayList<Coordinate> path){
+		if (this.car.getHealth() > RECOVERTHRESHOLD) {
+			return path;
+		}
+		
+		for (int i = 0; i < path.size(); i++) {
+			if (Route.isHealth(path.get(i), this.controller.getKnownMap())) {
+				for (int j = i + 1; j < path.size(); j++)
+					path.remove(j);
+			}
+		}
+		return path;
 	}
 }

@@ -33,13 +33,24 @@ public class PerceptionModule {
 				this.exits.add(coor);
 		}
 	}
-	
+
 	public boolean isLava(Coordinate coor) {
 		if (!this.knownMap.containsKey(coor)) {
 			return false;
 		}
 		MapTile tile = knownMap.get(coor);
 		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("lava")) {
+			return true;
+		}else
+			return false;
+	}
+	
+	public boolean isHealth(Coordinate coor) {
+		if (!this.knownMap.containsKey(coor)) {
+			return false;
+		}
+		MapTile tile = knownMap.get(coor);
+		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("health")) {
 			return true;
 		}else
 			return false;
@@ -81,6 +92,16 @@ public class PerceptionModule {
 
 	public ArrayList<Coordinate> getExit(){
 		return exits;
+	}
+	
+	public ArrayList<Coordinate> getHealthTraps(){
+		ArrayList<Coordinate> healths = new ArrayList<Coordinate>();
+		for(Coordinate coor: knownMap.keySet()) {
+			if (isHealth(coor)) {
+				healths.add(coor);
+			}
+		}
+		return healths;
 	}
 	
 	public ArrayList<Coordinate> getUnsearched(){
