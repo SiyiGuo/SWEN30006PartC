@@ -26,10 +26,6 @@ public class ActionModule {
 	}
 	
 	Direction getDirection(float x_dir, float y_dir) {
-		float offset = (float)0;
-		
-		float x_offset = Math.abs(x_dir - Math.round(x_dir));
-		float y_offset = Math.abs(y_dir - Math.round(y_dir));
 		
 		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
 			return Direction.NORTH;
@@ -52,11 +48,16 @@ public class ActionModule {
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
-		System.out.println(path);
+//		System.out.println(path);
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
 		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
-			this.car.applyForwardAcceleration();
+			if (this.detectFrontWall()){
+				this.car.applyReverseAcceleration();
+			} else {
+				this.car.applyForwardAcceleration();
+			}
+			
 			return;
 		}
 		
@@ -65,7 +66,7 @@ public class ActionModule {
 				System.out.println("Do MNothjing");
 				Coordinate currentPos = new Coordinate(this.car.getPosition());
 				System.out.println(currentPos);
-				this.car.applyBrake();
+				this.car.applyBrake();;
 			}
 			
 		} else {
@@ -116,54 +117,44 @@ public class ActionModule {
 		}	
 	}
 	
+	private boolean detectFrontWall() {
+		Coordinate currentPos = new Coordinate(this.car.getPosition());
+		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
+		Coordinate nextPos;
+		switch (this.car.getOrientation()) {
+		case NORTH:
+			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y+1));
+			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
+				return true;
+			}
+			return false;
+		case SOUTH:
+			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y-1));
+			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
+				return true;
+			}
+			return false;
+		case WEST:
+			nextPos = new Coordinate((currentPos.x-1)+","+(currentPos.y));
+			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
+				return true;
+			}
+			return false;
+		case EAST:
+			nextPos = new Coordinate((currentPos.x+1)+","+(currentPos.y));
+			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
+				return true;
+			}
+			return false;
+		default:
+			return false;
+		}
+	}
+	
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 	}
-	
-	private boolean needAdjust(Direction lastDirection, float now_x, float now_y, Coordinate nextPos) {
-	    switch (lastDirection ) {
-	 
-	    case WEST:
-	      if (nextPos.x < now_x) {
-	        System.out.println(nextPos.x);
-	        System.out.println(now_x);
-	        return true;
-	      }
-	      else {
-	        return false;
-	      }
-	    case EAST:
-	      if (nextPos.x > now_x) {
-	        System.out.println(nextPos.x);
-	        System.out.println(now_x);
-	        return true;
-	      }
-	      else {
-	        return false;
-	      }
-	    case NORTH:
-	      if (nextPos.y > now_y) { 
-	        System.out.println(nextPos.y);
-	        System.out.println(now_y);
-	        return true;
-	      }
-	      else {
-	        return false;
-	      }
-	    case SOUTH:
-	        if (nextPos.y < now_y) {
-	          System.out.println(nextPos.y);
-	          System.out.println(now_y);
-	          return true;
-	        }
-	        else {
-	          return false;
-	        }
-	    default:
-	      return false;
-	    }
-	  }
-	
+		
 	public void turn(float delta, Direction direction) {
 		int absoluteDegree = 0;
 		switch (direction) {
