@@ -20,6 +20,11 @@ public class DecisionModule {
 	private HashMap<Coordinate, MapTile> roadMap;
 	private Coordinate positionWhenLastFindPath;
 	private ArrayList<Coordinate> lastPath;
+	private float lastDirection;
+	public static final float EAST = 0;
+	public static final float NORTH = 90;
+	public static final float WEST = 180;
+	public static final float SOUTH = 270;
 	
 	public DecisionModule(MyAIController controller, Car car) {
 		this.car = car;
@@ -28,6 +33,7 @@ public class DecisionModule {
 	}
 	
 	public ArrayList<Coordinate> generatePath() {
+		this.lastDirection = car.getRotation();
 		Coordinate currentPosition = new Coordinate(controller.getPosition());
 		
 		if (positionWhenLastFindPath != null && currentPosition.equals(positionWhenLastFindPath)) {
@@ -78,15 +84,27 @@ public class DecisionModule {
 				paths.add(path);
 				continue;
 			}
+			if (path.size()>1 && !path.get(0).equals(path.get(1))) {
+				int pathsize = path.size();
+				if (path.get(pathsize - 1).x > path.get(pathsize - 2).x)
+					lastDirection = EAST;
+				else if (path.get(pathsize - 1).x < path.get(pathsize - 2).x)
+					lastDirection = WEST;
+				else if (path.get(pathsize - 1).y > path.get(pathsize - 2).y)
+					lastDirection = NORTH;
+				else if (path.get(pathsize - 1).y < path.get(pathsize - 2).y)
+					lastDirection = SOUTH;
+			}
 			Coordinate lastNode = path.get(path.size() - 1);
 			Coordinate lastNodeWest = new Coordinate((lastNode.x - 1) + "," + lastNode.y);
 			Coordinate lastNodeEast = new Coordinate((lastNode.x + 1) + "," + lastNode.y);
 			Coordinate lastNodeNorth = new Coordinate(lastNode.x + "," + (lastNode.y + 1));
 			Coordinate lastNodeSouth = new Coordinate(lastNode.x + "," + (lastNode.y - 1));
-			Coordinate[] neighbours = {lastNodeWest, lastNodeEast, lastNodeNorth, lastNodeSouth};
+			Coordinate[] neighbours = {lastNodeEast, lastNodeNorth, lastNodeWest, lastNodeSouth};
 			for (int i = 0; i < neighbours.length; i++) {
 				if (destinations.contains(neighbours[i])) {
 					path.add(neighbours[i]);
+					System.out.println(path.toString());
 					for (int j = path.size() - 1; j > 0; j--) {
 						if (path.get(j).equals(path.get(j - 1))) {
 							path.remove(j);
@@ -102,11 +120,38 @@ public class DecisionModule {
 						if (!traversed.contains(neighbours[i])) {
 							ArrayList<Coordinate> pathcopy = new ArrayList<Coordinate>(path);
 							pathcopy.add(neighbours[i]);
+							if (Math.abs(i * 90 - lastDirection)> 70) {
+								pathcopy.add(neighbours[i]);
+								MapTile previous = this.controller.getPModule().getKnownMap().
+												   get(lastNode);
+
+								if (previous.isType(MapTile.Type.TRAP) && 
+									!((TrapTile)previous).getTrap().equals("health")) {
+									System.out.println("go to "+neighbours[i].toString() + "from "+ lastNode.toString() +" at degree of " + i*90  +"from "+lastDirection + lastNode.toString()+"is a trapnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+									pathcopy.add(neighbours[i]);
+								}
+							}
 							traversed.add(neighbours[i]);
 							MapTile neighbour = this.controller.getPModule().getKnownMap().
 												get(neighbours[i]);
 							if (neighbour.isType(MapTile.Type.TRAP) && 
-								((TrapTile)neighbour).getTrap().equals("lava")) {
+								!((TrapTile)neighbour).getTrap().equals("health")) {
+								pathcopy.add(neighbours[i]);
 								pathcopy.add(neighbours[i]);
 							}
 							paths.add(pathcopy);

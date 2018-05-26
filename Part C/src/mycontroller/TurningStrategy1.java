@@ -10,14 +10,19 @@ public class TurningStrategy1 implements TurningStrategy{
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
+		System.out.println("turing to "+absoluteDegree);
 		this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
-		float turning_ratio = (float)2;
+		float directionDiff = Math.abs(currentDegree - absoluteDegree);
+		if (directionDiff > 180) directionDiff = 360 - directionDiff;
+		float turning_ratio = directionDiff / 180 * 54;
+		//if (this.car.getSpeed() > 2)
+		//	this.car.applyReverseAcceleration();
+		//if (this.car.getSpeed() < 2)
+		//	this.car.applyForwardAcceleration();
 		if ((currentDegree != absoluteDegree)) {
-
-			this.car.applyReverseAcceleration();
 			
 			if ((currentDegree - absoluteDegree) >= 0 ) {
 				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {

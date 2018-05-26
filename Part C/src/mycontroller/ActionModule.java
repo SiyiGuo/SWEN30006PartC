@@ -17,18 +17,32 @@ public class ActionModule {
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
 	public enum TurnDirection {LEFT, RIGHT, INVERSE};
+	private Coordinate lastTurnTo;
+	private double directionInDegree;
 	
 	public ActionModule(Car car) {
 		this.car = car;
 		this.StraightLineModule = new StraightLineStrategy1(this.car);
 		this.TurningModule = new TurningStrategy1(this.car);
 	}
+	public float getDirectionInDegree(float x_dir, float y_dir) {
+		
+		if (x_dir == 0) {
+			return y_dir>0 ? 90 : -90;
+		}
+		float degree = (float)(Math.atan(y_dir/x_dir) / Math.PI * 180);
+		if (x_dir > 0) {
+			if (y_dir >= 0) {
+				return degree;
+			}else {
+				return degree + 360;
+			}
+		}else {
+			return degree + 180;
+		}
+	}
 	
 	Direction getDirection(float x_dir, float y_dir) {
-		float offset = (float)0;
-		
-		float x_offset = Math.abs(x_dir - Math.round(x_dir));
-		float y_offset = Math.abs(y_dir - Math.round(y_dir));
 		
 		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
 			return Direction.NORTH;
@@ -54,7 +68,7 @@ public class ActionModule {
 //		System.out.println(path);
 		if (path.size() == 1) {
 			if (path.get(0).toString().equals("99,99")) {
-				System.out.println("Do MNothjing");
+				System.out.println("Do Nothing");
 				Coordinate currentPos = new Coordinate(this.car.getPosition());
 				System.out.println(currentPos);
 				this.car.brake();
@@ -65,25 +79,21 @@ public class ActionModule {
 			Coordinate currentPos = new Coordinate(this.car.getPosition());
 			float accurate_x = this.car.getX();
 			float accurate_y = this.car.getY();
-			WorldSpatial.Direction currentDirection = this.car.getOrientation();
-			System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
-								accurate_x, accurate_y));
+			float currentDirection = this.car.getRotation();
+			//System.out.println(String.format("next:%s, current:%s, myDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, 
+			//					accurate_x, accurate_y));
 				    
 			float x_dir = nextPos.x-accurate_x;
 			float y_dir = nextPos.y-accurate_y;
-			Direction direction = this.getDirection(x_dir, y_dir);
+			float direction = this.getDirectionInDegree(x_dir, y_dir);
 			
-			if (currentDirection.equals(direction)) {
-				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
-				this.lastStraightLineDirection = direction;
-			} else {
-				if (needAdjust(this.lastStraightLineDirection, accurate_x, accurate_y, nextPos)) {
-			        System.out.println("pass");
-			        this.car.applyReverseAcceleration();
-			      } else {
-			        this.turn(delta, direction);
-			      }
-			}		
+			if (Math.abs(currentDirection - direction) < 1) {
+				this.StraightLineModule.move(nextPos, accurate_x, accurate_y);
+			} else if (lastTurnTo == null || !lastTurnTo.equals(nextPos)){
+				System.out.println("turn to "+nextPos.toString()+" current angle is "+car.getAngle());
+				this.TurningModule.turn(delta, (int)getDirectionInDegree(x_dir, y_dir));
+				this.lastTurnTo = nextPos;
+			}	
 		}	
 	}
 	

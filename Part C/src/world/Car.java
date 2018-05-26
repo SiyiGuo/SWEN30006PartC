@@ -94,7 +94,7 @@ public class Car extends Sprite{
 
 	public void update(float delta) {
 			if(Simulation.DEBUG_MODE){
-				printDebug();
+				//printDebug();
 			}
 			// Get the current tile
 			MapTile currentTile = World.lookUp(getX(), getY());
@@ -277,11 +277,13 @@ public class Car extends Sprite{
 
 
 	public void turnRight(float delta) {
+		System.out.println("angle was "+angle);
 		angle -= ROTATING_FACTOR * delta;
 		if(reversing){
 			angle *= -1;
 		}
 		snapTo(reversing,currentOrientation,WorldSpatial.RelativeDirection.RIGHT);
+		System.out.println("angle changed to "+angle);
 	}
 
 	private void applySteering(MapTile currentTile){

@@ -25,7 +25,9 @@ public class MyAIController extends CarController{
 		    this.aModule = new ActionModule(car);
 		} 
 		 
-		public ArrayList<Coordinate> generatePath(HashMap<Integer, Coordinate> worldMap, ArrayList<Coordinate> unsearched, Coordinate source, Coordinate destination){ 
+		public ArrayList<Coordinate> generatePath(HashMap<Integer, Coordinate> worldMap, 
+												  ArrayList<Coordinate> unsearched, Coordinate source, 
+												  Coordinate destination){ 
 		    return new ArrayList<Coordinate>(); 
 		} 
 		
@@ -41,7 +43,6 @@ public class MyAIController extends CarController{
 
 			// Deciding the path
 		    path = dModule.generatePath();
-		    
 		    // Move
 			aModule.drive(delta, path);
 //		    aModule.turn(delta, Direction.NORTH);
