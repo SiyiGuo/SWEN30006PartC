@@ -34,6 +34,17 @@ public class PerceptionModule {
 		}
 	}
 	
+	public boolean isLava(Coordinate coor) {
+		if (!this.knownMap.containsKey(coor)) {
+			return false;
+		}
+		MapTile tile = knownMap.get(coor);
+		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("lava")) {
+			return true;
+		}else
+			return false;
+	}
+	
 	public void update() {
 
 		// Gets what the car can see

@@ -20,6 +20,7 @@ public class DecisionModule {
 	private HashMap<Coordinate, MapTile> roadMap;
 	private Coordinate positionWhenLastFindPath;
 	private ArrayList<Coordinate> lastPath;
+	private float lastAngle;
 	
 	public DecisionModule(MyAIController controller, Car car) {
 		this.car = car;
