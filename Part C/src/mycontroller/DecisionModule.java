@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
 
@@ -18,6 +17,7 @@ public class DecisionModule {
 	public static final int NORTH = 1;
 	public static final int WEST = 2;
 	public static final int SOUTH = 3;
+	public static final int MAXCOST = 999999;
 	
 	private Car car;
 	private MyAIController controller;
@@ -33,15 +33,25 @@ public class DecisionModule {
 	}
 	//reminder: health»ØÑª,
 	public ArrayList<Coordinate> generatePath() {
-		Coordinate currentPosition = new Coordinate(controller.getPosition());
+		Coordinate currentCoor = new Coordinate(controller.getPosition());
+		HashMap<Position, Integer> costs = new HashMap<Position, Integer>();
+		Position currentPos, newPos;
+		for (Coordinate coor:this.roadMap.keySet()) {
+			//representing four directions
+			for (int i = 0; i < 4; i++) {
+				Position pos = new Position(coor, i);
+				costs.put(pos, MAXCOST);
+			}
+		}
+		
 		int iniDirection = Math.round(car.getAngle() / 90) % 4;
 		
-		if (positionWhenLastFindPath != null && currentPosition.equals(positionWhenLastFindPath)) {
+		if (positionWhenLastFindPath != null && currentCoor.equals(positionWhenLastFindPath)) {
 			return lastPath;
 		}
 		
 		if (this.car.getHealth() < RECOVERTHRESHOLD && 
-			Route.isHealth(currentPosition, this.controller.getKnownMap())) {
+			Route.isHealth(currentCoor, this.controller.getKnownMap())) {
 			ArrayList<Coordinate> path = new ArrayList<Coordinate>();
 			path.add(new Coordinate(DONOTHING));
 			return path;
@@ -68,9 +78,12 @@ public class DecisionModule {
 		}
 		
 		route = new Route(new ArrayList<Coordinate>(), 0, iniDirection);
-		route.addNode(currentPosition, iniDirection, this.controller.getKnownMap());
+		route.addNode(currentCoor, iniDirection, this.controller.getKnownMap());
+		currentPos = new Position(currentCoor, iniDirection);
+		if (route.getCost() < costs.get(currentPos))
+			costs.put(currentPos, route.getCost());
 		
-		if (destinations.contains(currentPosition)) {
+		if (destinations.contains(currentCoor)) {
 			return route.getPath();
 		}
 		
@@ -81,7 +94,7 @@ public class DecisionModule {
 			Coordinate lastNode = path.get(path.size() - 1);
 			
 			if (destinations.contains(lastNode)) {
-				this.positionWhenLastFindPath = currentPosition;
+				this.positionWhenLastFindPath = currentCoor;
 				this.lastPath = new ArrayList<Coordinate>(route.getPath());
 				return processWithRecoverStrategy(route.getPath());
 			}
@@ -102,12 +115,17 @@ public class DecisionModule {
 						if (!path.contains(neighbours[i])) {
 							Route routeCopy = new Route(route);
 							routeCopy.addNode(neighbours[i], i, this.controller.getKnownMap());
-							routes = insertRoute(routes, routeCopy);
+							newPos = new Position(neighbours[i], i);
+							if (route.getCost() < costs.get(newPos)) {
+								costs.put(newPos, route.getCost());
+								routes = insertRoute(routes, routeCopy);
+							}
 						}
 					}
 				}
 			}
 		}
+		System.out.println("returning null!");
 		return null;
 	}
 	

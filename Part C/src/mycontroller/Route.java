@@ -33,7 +33,6 @@ public class Route {
 	}
 	
 	public void addNode(Coordinate coor, int direction, HashMap<Coordinate, MapTile> knownMap) {
-		System.out.println("path was: "+path.toString() + " \n cost was "+ cost + "direction was: " + this.currentDirection);
 		switch (this.path.size()) {
 		case(0):
 			this.path.add(coor);
