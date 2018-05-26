@@ -3,8 +3,8 @@ import utilities.Coordinate;
 import world.Car;
 
 public class StraightLineStrategy1 implements StraightLineStrategy{
-	private Car car;
-	public StraightLineStrategy1(Car car) {
+	private MyAIController car;
+	public StraightLineStrategy1(MyAIController car) {
 		this.car = car;
 	}
 	

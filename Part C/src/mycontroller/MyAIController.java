@@ -22,7 +22,7 @@ public class MyAIController extends CarController{
 			super(car);
 			this.pModule = new PerceptionModule(this, car); 
 		    this.dModule = new DecisionModule(this, car); 
-		    this.aModule = new ActionModule(car);
+		    this.aModule = new ActionModule(this);
 		} 
 		 
 		public ArrayList<Coordinate> generatePath(HashMap<Integer, Coordinate> worldMap, ArrayList<Coordinate> unsearched, Coordinate source, Coordinate destination){ 
@@ -46,6 +46,10 @@ public class MyAIController extends CarController{
 			aModule.drive(delta, path);
 //		    aModule.turn(delta, Direction.WEST);
 
+		}
+		
+		public HashMap<Coordinate, MapTile> getKnownMap(){
+			return this.pModule.getKnownMap();
 		}
 		
 		public PerceptionModule getPModule() {

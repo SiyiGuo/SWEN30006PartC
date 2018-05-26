@@ -5,20 +5,21 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import tiles.MapTile;
+import tiles.TrapTile;
 import utilities.Coordinate;
 import world.Car;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 public class ActionModule {
-	private Car car;
+	private MyAIController car;
 	
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
 	public enum TurnDirection {LEFT, RIGHT, INVERSE};
 	
-	public ActionModule(Car car) {
+	public ActionModule(MyAIController car) {
 		this.car = car;
 		this.StraightLineModule = new StraightLineStrategy1(this.car);
 		this.TurningModule = new TurningStrategy2(this.car);
@@ -52,12 +53,19 @@ public class ActionModule {
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println(path);
+		
+		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
+		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
+			this.car.applyForwardAcceleration();
+			return;
+		}
+		
 		if (path.size() == 1) {
 			if (path.get(0).toString().equals("99,99")) {
 				System.out.println("Do MNothjing");
 				Coordinate currentPos = new Coordinate(this.car.getPosition());
 				System.out.println(currentPos);
-				this.car.brake();
+				this.car.applyBrake();
 			}
 			
 		} else {

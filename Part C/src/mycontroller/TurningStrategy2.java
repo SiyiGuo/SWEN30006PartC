@@ -3,8 +3,8 @@ package mycontroller;
 import world.Car;
 
 public class TurningStrategy2 implements TurningStrategy{
-	private Car car;
-	public TurningStrategy2(Car car) {
+	private MyAIController car;
+	public TurningStrategy2(MyAIController car) {
 		this.car = car;
 	}
 	
@@ -18,7 +18,7 @@ public class TurningStrategy2 implements TurningStrategy{
 		if ((currentDegree != absoluteDegree)) {
 			
 			if (this.car.getSpeed() > 0.1) {
-				this.car.brake();
+				this.car.applyBrake();
 			} else {
 				this.car.applyReverseAcceleration();
 			}
@@ -39,7 +39,7 @@ public class TurningStrategy2 implements TurningStrategy{
 				}
 			}
 		}  else {
-			this.car.brake();
+			this.car.applyBrake();
 		}
 	}
 

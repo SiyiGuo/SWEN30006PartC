@@ -3,8 +3,8 @@ package mycontroller;
 import world.Car;
 
 public class TurningStrategy1 implements TurningStrategy{
-	private Car car;
-	public TurningStrategy1(Car car) {
+	private MyAIController car;
+	public TurningStrategy1(MyAIController car) {
 		this.car = car;
 	}
 	
@@ -33,7 +33,7 @@ public class TurningStrategy1 implements TurningStrategy{
 				}
 			}
 		}  else {
-			this.car.brake();
+			this.car.applyBrake();
 		}
 	}
 
