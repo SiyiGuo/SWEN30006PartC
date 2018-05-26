@@ -74,6 +74,7 @@ public class DecisionModule {
 		paths.add(path);
 		while (!paths.isEmpty()) {
 			path = paths.remove(0);
+			
 			if (!paths.isEmpty() && (path.size() > paths.get(0).size())) {
 				paths.add(path);
 				continue;
@@ -98,6 +99,8 @@ public class DecisionModule {
 				}
 				if (this.roadMap.containsKey(neighbours[i])) {
 					if ((this.roadMap.get(neighbours[i]).isType(MapTile.Type.ROAD)) ||
+							(this.roadMap.get(neighbours[i]).isType(MapTile.Type.FINISH)) ||
+							(this.roadMap.get(neighbours[i]).isType(MapTile.Type.START)) ||
 						(this.roadMap.get(neighbours[i]).isType(MapTile.Type.TRAP))) {
 						if (!traversed.contains(neighbours[i])) {
 							ArrayList<Coordinate> pathcopy = new ArrayList<Coordinate>(path);

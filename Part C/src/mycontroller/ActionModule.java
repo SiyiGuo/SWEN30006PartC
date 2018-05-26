@@ -51,7 +51,7 @@ public class ActionModule {
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
-//		System.out.println(path);
+		System.out.println(path);
 		if (path.size() == 1) {
 			if (path.get(0).toString().equals("99,99")) {
 				System.out.println("Do MNothjing");
