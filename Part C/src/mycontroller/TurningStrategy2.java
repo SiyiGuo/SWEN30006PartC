@@ -71,7 +71,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private void minorBack() {
-		final float maxBackAdjustmentSpeed = (float) 0.1;
+		final float maxBackAdjustmentSpeed = (float) 0.2;
 		if (this.carController.getSpeed() > maxBackAdjustmentSpeed) {
 			this.carController.applyBrake();
 		} else {
