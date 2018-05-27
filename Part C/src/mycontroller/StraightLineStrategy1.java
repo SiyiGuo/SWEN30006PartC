@@ -3,11 +3,11 @@ import utilities.Coordinate;
 import world.Car;
 
 public class StraightLineStrategy1 implements StraightLineStrategy{
-	private MyAIController car;
+	private MyAIController carController;
 	private float maxSpeed = (float)2.5;
 	
 	public StraightLineStrategy1(MyAIController car) {
-		this.car = car;
+		this.carController = car;
 	}
 	
 	@Override
@@ -18,10 +18,10 @@ public class StraightLineStrategy1 implements StraightLineStrategy{
 	
 	@Override
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
-		if (this.car.getSpeed() < this.maxSpeed) {
-			this.car.applyForwardAcceleration();
+		if (this.carController.getSpeed() < this.maxSpeed) {
+			this.carController.applyForwardAcceleration();
 		} else {
-			this.car.applyBrake();
+			this.carController.applyBrake();
 		}
 		 
 	}

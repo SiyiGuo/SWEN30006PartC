@@ -16,16 +16,12 @@ public class TurningStrategy2 implements TurningStrategy{
 		this.carController = car;
 	}
 	
-	private void slowDown() {
-		if (this.carController.getSpeed() > 2.5){
-			this.carController.applyReverseAcceleration();
-		} else {
-			this.carController.applyBrake();
-		}
-		
-	}
 	
 	@Override
+	/**
+	 * Apply a turn
+	 * adjustment needed if necessary
+	 */
 	public void turn(float delta, int absoluteDegree) {
 		final float maxTurningSpeed = (float) 0.2;
 		
@@ -34,7 +30,6 @@ public class TurningStrategy2 implements TurningStrategy{
 			this.slowDown();
 		}else {
 			if (adjust()) {
-				System.out.println("adjust");
 				return;
 			} else {
 				this.turnToDirection(this.carController.getAngle(), delta, absoluteDegree);
@@ -42,6 +37,9 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * Only turning to a speficy direction
+	 */
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
 		final float maxSmallTurnSpeed = (float) 0.1;
 		if ((currentDegree != absoluteDegree)) {
@@ -70,6 +68,22 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * Slowing down function for reducing speed
+	 */
+	private void slowDown() {
+		if (this.carController.getSpeed() > 2.5){
+			this.carController.applyReverseAcceleration();
+		} else {
+			this.carController.applyBrake();
+		}
+		
+	}
+	
+	/**
+	 * Small moving function
+	 * doing a backward adjustment
+	 */
 	private void minorBack() {
 		final float maxBackAdjustmentSpeed = (float) 0.2;
 		if (this.carController.getSpeed() > maxBackAdjustmentSpeed) {
@@ -79,6 +93,10 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * Small moving function
+	 * doing a forward adjustment
+	 */
 	private void minorForward() {
 		final float maxForwardAdjustmentSpeed = (float) 0.1;
 		
@@ -89,6 +107,10 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * Doing the adjustment before turn
+	 * @return true if has adjust, false if can star turn
+	 */
 	private boolean adjust() {
 		WallPosition wallPosition = checkWall();
 		System.out.println("WallPosition: " + wallPosition);
@@ -102,6 +124,10 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * if there is a wall in front of us, backward adjust
+	 * @return backward adjust success
+	 */
 	private boolean frontWallAdjust() {
 		Direction currentDirection = this.carController.getOrientation();
 		Coordinate currentPos = new Coordinate(this.carController.getPosition());
@@ -139,6 +165,10 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * if there is a wall behind us, forward adjust
+	 * @return boolean, forward adjust success
+	 */
 	private boolean backWallAdjust() {
 		Direction currentDirection = this.carController.getOrientation();
 		Coordinate currentPos = new Coordinate(this.carController.getPosition());
@@ -174,6 +204,10 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	/**
+	 * Wall detector
+	 * @return where the wall is
+	 */
 	private WallPosition checkWall() {
 		Direction currentDirection = this.carController.getOrientation();
 		HashMap<Coordinate, MapTile> currentView = this.carController.getView();
