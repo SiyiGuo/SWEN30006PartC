@@ -38,6 +38,7 @@ public class DecisionModule {
 		Coordinate currentCoor = new Coordinate(controller.getPosition());
 		HashMap<Position, Integer> costs = new HashMap<Position, Integer>();
 		HashMap<Integer, Coordinate> keyMap = this.controller.getPModule().getKeyMap();
+		ArrayList<Coordinate> healths = this.controller.getPModule().getHealthTraps();
 		Position currentPos, newPos, pos;
 		ArrayList<Route> routes = new ArrayList<Route>();
 		Route route;
@@ -70,9 +71,9 @@ public class DecisionModule {
 		// decides destination depending on 
 		
 		// 1) if the car is in critical low health
-		if (this.car.getHealth() < LOWHEALTHTHRESHOLD) {
+		if (this.car.getHealth() < LOWHEALTHTHRESHOLD && !healths.isEmpty()) {
 			this.mode = Mode.DESTINATION;
-			this.destinations = this.controller.getPModule().getHealthTraps();
+			this.destinations = healths;
 		} 
 		
 		else if ((currentKey == 1) || (keyMap.containsKey(currentKey - 1))){
