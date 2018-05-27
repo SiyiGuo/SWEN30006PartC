@@ -9,27 +9,34 @@ import world.Car;
 import world.WorldSpatial.Direction;
 
 public class TurningStrategy2 implements TurningStrategy{
-	private MyAIController car;
-	private int wallSensitivity = 4;
+	private MyAIController carController;
+	
+	private final float maxTurningSpeed = (float) 0.2;
 	public enum WallPosition {FRONT, FOLLOWING, NOWALL};
 	public TurningStrategy2(MyAIController car) {
-		this.car = car;
+		this.carController = car;
+	}
+	
+	private void slowDown() {
+		if (this.carController.getSpeed() > 2.5){
+			this.carController.applyReverseAcceleration();
+		} else {
+			this.carController.applyBrake();
+		}
+		
 	}
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
-		if (this.car.getSpeed() > 0.2) {
-			if (this.car.getSpeed() > 2.5){
-				this.car.applyReverseAcceleration();
-			} else {
-				this.car.applyBrake();
-			}
+		/* case maximum turning speed */
+		if (this.carController.getSpeed() > maxTurningSpeed) {
+			this.slowDown();
 		}else {
 			if (adjust()) {
 				System.out.println("adjust");
 				return;
 			} else {
-				this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
+				this.turnToDirection(this.carController.getAngle(), delta, absoluteDegree);
 			}
 		}
 	}
@@ -37,42 +44,42 @@ public class TurningStrategy2 implements TurningStrategy{
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
 		if ((currentDegree != absoluteDegree)) {
 			
-			if (this.car.getSpeed() > 0.1) {
-				this.car.applyBrake();
+			if (this.carController.getSpeed() > 0.1) {
+				this.carController.applyBrake();
 			} else {
-				this.car.applyReverseAcceleration();
+				this.carController.applyReverseAcceleration();
 			}			
 			if ((currentDegree - absoluteDegree) >= 0 ) {
 				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {
-					this.car.turnLeft(delta);
+					this.carController.turnLeft(delta);
 				} else {
-					this.car.turnRight(delta);
+					this.carController.turnRight(delta);
 				}
 			} else {
 				if (Math.abs(absoluteDegree-currentDegree) < Math.abs(360 + currentDegree - absoluteDegree)) {
-					this.car.turnRight(delta);
+					this.carController.turnRight(delta);
 				} else {
-					this.car.turnLeft(delta);
+					this.carController.turnLeft(delta);
 				}
 			}
 		}  else {
-			this.car.applyBrake();
+			this.carController.applyBrake();
 		}
 	}
 	
-	public void minorBack() {
-		if (this.car.getSpeed() > 0.1) {
-			this.car.applyBrake();
+	private void minorBack() {
+		if (this.carController.getSpeed() > 0.1) {
+			this.carController.applyBrake();
 		} else {
-			this.car.applyReverseAcceleration();
+			this.carController.applyReverseAcceleration();
 		}
 	}
 	
-	public void minorForward() {
-		if (this.car.getSpeed() > 0.1) {
-			this.car.applyBrake();
+	private void minorForward() {
+		if (this.carController.getSpeed() > 0.1) {
+			this.carController.applyBrake();
 		} else {
-			this.car.applyForwardAcceleration();
+			this.carController.applyForwardAcceleration();
 		}
 	}
 	
@@ -90,10 +97,10 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private boolean frontWallAdjust() {
-		Direction currentDirection = this.car.getOrientation();
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		float x = this.car.getX();
-		float y = this.car.getY();
+		Direction currentDirection = this.carController.getOrientation();
+		Coordinate currentPos = new Coordinate(this.carController.getPosition());
+		float x = this.carController.getX();
+		float y = this.carController.getY();
 		switch (currentDirection){
 		case WEST:
 			if (currentPos.x > x) {
@@ -125,10 +132,10 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private boolean backWallAdjust() {
-		Direction currentDirection = this.car.getOrientation();
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		float x = this.car.getX();
-		float y = this.car.getY();
+		Direction currentDirection = this.carController.getOrientation();
+		Coordinate currentPos = new Coordinate(this.carController.getPosition());
+		float x = this.carController.getX();
+		float y = this.carController.getY();
 		switch (currentDirection){
 		case WEST:
 			if (currentPos.x < x) {
@@ -160,8 +167,8 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private WallPosition checkWall() {
-		Direction currentDirection = this.car.getOrientation();
-		HashMap<Coordinate, MapTile> currentView = this.car.getView();
+		Direction currentDirection = this.carController.getOrientation();
+		HashMap<Coordinate, MapTile> currentView = this.carController.getView();
 		switch (currentDirection) {
 		case EAST:
 			if (checkEast(currentView)) {
@@ -210,7 +217,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	 */
 	public boolean checkEast(HashMap<Coordinate, MapTile> currentView){
 		// Check tiles to my right
-		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		Coordinate currentPosition = new Coordinate(this.carController.getPosition());
 		for (Coordinate coor: currentView.keySet()) {
 			if (coor.x == currentPosition.x+1) {
 				MapTile tile = currentView.get(coor);
@@ -224,7 +231,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	
 	public boolean checkWest(HashMap<Coordinate,MapTile> currentView){
 		// Check tiles to my left
-		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		Coordinate currentPosition = new Coordinate(this.carController.getPosition());
 		for (Coordinate coor: currentView.keySet()) {
 			if (coor.x == currentPosition.x-1) {
 				MapTile tile = currentView.get(coor);
@@ -237,7 +244,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	public boolean checkNorth(HashMap<Coordinate,MapTile> currentView){
-		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		Coordinate currentPosition = new Coordinate(this.carController.getPosition());
 		for (Coordinate coor: currentView.keySet()) {
 			if (coor.y == currentPosition.y+1) {
 				MapTile tile = currentView.get(coor);
@@ -250,7 +257,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	public boolean checkSouth(HashMap<Coordinate,MapTile> currentView){
-		Coordinate currentPosition = new Coordinate(this.car.getPosition());
+		Coordinate currentPosition = new Coordinate(this.carController.getPosition());
 		for (Coordinate coor: currentView.keySet()) {
 			if (coor.y == currentPosition.y-1) {
 				MapTile tile = currentView.get(coor);
