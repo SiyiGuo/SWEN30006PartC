@@ -18,6 +18,7 @@ public class ActionModule {
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
+	private boolean forwardLava = true;
 	public enum TurnDirection {LEFT, RIGHT, INVERSE};
 	public boolean needAdjustment;
 	
@@ -63,12 +64,17 @@ public class ActionModule {
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
 		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
 			if (this.detectFrontWall()){
-				this.car.applyReverseAcceleration();
-			} else {
+				this.forwardLava = false;
+			}
+			if (this.forwardLava) {
 				this.car.applyForwardAcceleration();
+			} else {
+				this.car.applyReverseAcceleration();
 			}
 			
 			return;
+		} else {
+			this.forwardLava = true;
 		}
 		
 		if (path.size() == 1) {
@@ -162,6 +168,7 @@ public class ActionModule {
 			return false;
 		}
 	}
+	
 	
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
