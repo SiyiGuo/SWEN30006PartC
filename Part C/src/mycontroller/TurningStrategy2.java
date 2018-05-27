@@ -27,7 +27,8 @@ public class TurningStrategy2 implements TurningStrategy{
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
-		private final float maxTurningSpeed = (float) 0.2;
+		final float maxTurningSpeed = (float) 0.2;
+		
 		/* case maximum turning speed */
 		if (this.carController.getSpeed() > maxTurningSpeed) {
 			this.slowDown();
@@ -42,13 +43,14 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
+		final float maxSmallTurnSpeed = (float) 0.1;
 		if ((currentDegree != absoluteDegree)) {
-			
-			if (this.carController.getSpeed() > 0.1) {
+			if (this.carController.getSpeed() > maxSmallTurnSpeed) {
 				this.carController.applyBrake();
 			} else {
 				this.carController.applyReverseAcceleration();
 			}			
+			
 			if ((currentDegree - absoluteDegree) >= 0 ) {
 				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {
 					this.carController.turnLeft(delta);
@@ -63,12 +65,14 @@ public class TurningStrategy2 implements TurningStrategy{
 				}
 			}
 		}  else {
+			//case we r at right direction
 			this.carController.applyBrake();
 		}
 	}
 	
 	private void minorBack() {
-		if (this.carController.getSpeed() > 0.1) {
+		final float maxBackAdjustmentSpeed = (float) 0.1;
+		if (this.carController.getSpeed() > maxBackAdjustmentSpeed) {
 			this.carController.applyBrake();
 		} else {
 			this.carController.applyReverseAcceleration();
@@ -76,7 +80,9 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private void minorForward() {
-		if (this.carController.getSpeed() > 0.1) {
+		final float maxForwardAdjustmentSpeed = (float) 0.1;
+		
+		if (this.carController.getSpeed() > maxForwardAdjustmentSpeed) {
 			this.carController.applyBrake();
 		} else {
 			this.carController.applyForwardAcceleration();
@@ -99,8 +105,10 @@ public class TurningStrategy2 implements TurningStrategy{
 	private boolean frontWallAdjust() {
 		Direction currentDirection = this.carController.getOrientation();
 		Coordinate currentPos = new Coordinate(this.carController.getPosition());
+		
 		float x = this.carController.getX();
 		float y = this.carController.getY();
+		
 		switch (currentDirection){
 		case WEST:
 			if (currentPos.x > x) {
@@ -170,14 +178,15 @@ public class TurningStrategy2 implements TurningStrategy{
 		Direction currentDirection = this.carController.getOrientation();
 		HashMap<Coordinate, MapTile> currentView = this.carController.getView();
 		switch (currentDirection) {
-		case EAST:
-			if (checkEast(currentView)) {
-				return WallPosition.FRONT;
-			} else if (checkWest(currentView)){
+		case EAST:		
+			if (checkWest(currentView)) {
 				return WallPosition.FOLLOWING;
+			} else if (checkEast(currentView)){
+				return WallPosition.FRONT;
 			} else {
 				return WallPosition.NOWALL;
 			}
+			
 		case WEST:
 			if (checkEast(currentView)) {
 				return WallPosition.FOLLOWING;
@@ -186,22 +195,25 @@ public class TurningStrategy2 implements TurningStrategy{
 			} else {
 				return WallPosition.NOWALL;
 			}
-		case SOUTH:
-			if (checkSouth(currentView)) {
-				return WallPosition.FRONT;
-			} else if (checkNorth(currentView)){
-				return WallPosition.FOLLOWING;
-			} else {
-				return WallPosition.NOWALL;
-			}
-		case NORTH:
+		case SOUTH:	
 			if (checkNorth(currentView)) {
-				return WallPosition.FRONT;
-			} else if (checkSouth(currentView)){
 				return WallPosition.FOLLOWING;
+			} else if (checkSouth(currentView)){
+				return WallPosition.FRONT;
 			} else {
 				return WallPosition.NOWALL;
 			}
+			
+		case NORTH:
+			
+			if (checkSouth(currentView)) {
+				return WallPosition.FOLLOWING;
+			} else if (checkNorth(currentView)){
+				return WallPosition.FRONT;
+			} else {
+				return WallPosition.NOWALL;
+			}
+			
 		default:
 			return WallPosition.NOWALL;
 		}
@@ -210,10 +222,10 @@ public class TurningStrategy2 implements TurningStrategy{
 	/**
 	 * Method below just iterates through the list and check in the correct coordinates.
 	 * i.e. Given your current position is 10,10
-	 * checkEast will check up to wallSensitivity amount of tiles to the right.
-	 * checkWest will check up to wallSensitivity amount of tiles to the left.
-	 * checkNorth will check up to wallSensitivity amount of tiles to the top.
-	 * checkSouth will check up to wallSensitivity amount of tiles below.
+	 * checkEast will check up all tiles that are wall to the right in currentView.
+	 * checkWest will check up all tiles that are wall to the left  in currentView.
+	 * checkNorth will check up all tiles that are wall to the top  in currentView.
+	 * checkSouth will check up all tiles that are wall below  in currentView.
 	 */
 	public boolean checkEast(HashMap<Coordinate, MapTile> currentView){
 		// Check tiles to my right
