@@ -101,7 +101,11 @@ public class ActionModule {
 				}
 				
 			} else { 
-			    this.turn(delta, nextDirection);		
+				if (nextDirection == null) {
+					this.car.applyForwardAcceleration();
+				}else {
+					this.turn(delta, nextDirection);
+				}	
 			}		
 		}	
 	}
