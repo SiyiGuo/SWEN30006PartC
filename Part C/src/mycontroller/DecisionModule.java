@@ -174,10 +174,11 @@ public class DecisionModule {
 			}
 			if (!PerceptionModule.isLava(forwardTile, knownMap)) {
 				// escape tile found, add to path
+				ArrayList<Coordinate> pathCopy = new ArrayList<Coordinate>(path);
 				for (int j = 1; j <= i; j++) {
-					path.add(Route.getForwardCoor(lastNode, dir, j));
+					pathCopy.add(Route.getForwardCoor(lastNode, dir, j));
 				}
-				return path;
+				return pathCopy;
 			}				
 		}
 		return null;
@@ -199,10 +200,10 @@ public class DecisionModule {
 		min = lresult != null && lresult.size() + TURNPUNISHMENT < min? lresult.size() + TURNPUNISHMENT: min;
 		min = rresult != null && rresult.size() + TURNPUNISHMENT < min? rresult.size() + TURNPUNISHMENT: min;
 
-		if(min == fresult.size()) return fresult;
-		if(min == bresult.size()) return bresult;
-		if(min == lresult.size() + TURNPUNISHMENT) return lresult;
-		if(min == rresult.size() + TURNPUNISHMENT) return rresult;
+		if(fresult != null && min == fresult.size()) return fresult;
+		if(fresult != null && min == bresult.size()) return bresult;
+		if(fresult != null && min == lresult.size() + TURNPUNISHMENT) return lresult;
+		if(fresult != null && min == rresult.size() + TURNPUNISHMENT) return rresult;
 		return path;
 	}
 	

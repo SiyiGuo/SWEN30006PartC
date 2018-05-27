@@ -13,14 +13,14 @@ public class TurningStrategy2 implements TurningStrategy{
 	@Override
 	public void turn(float delta, int absoluteDegree) {
 		if (this.car.getSpeed() > 0.5) {
-			System.out.println("stopppppppppppp!!");
+		/*	System.out.println("stopppppppppppp!!");
 			
 			try {
 				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+//			}*/
 			
 			this.car.applyBrake();
 		}else {
