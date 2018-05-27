@@ -38,6 +38,7 @@ public class ActionModule {
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
+		System.out.println("currAngle: " + this.carController.getAngle());
 		
 		//Get current position information
 		float accurate_x = this.carController.getX();
@@ -46,6 +47,8 @@ public class ActionModule {
 		Coordinate currentPos = new Coordinate(this.carController.getPosition());
 		
 		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
+		
+		
 		
 		/* case: we are one a lava */
 		if (PerceptionModule.isLava(currentPos, knownMap)) {
@@ -182,6 +185,26 @@ public class ActionModule {
 	}
 	
 	/*different kinds of motion module */
+	private void adjustAngle(Direction currentDirection) {
+		float currentAngle = this.carController.getAngle();
+		int absoluteDegree = 0;
+		switch (currentDirection) {
+		case EAST:
+			absoluteDegree = WorldSpatial.EAST_DEGREE_MAX;
+			break;
+		case NORTH:
+			absoluteDegree = WorldSpatial.NORTH_DEGREE;
+			break;
+		case SOUTH:
+			absoluteDegree = WorldSpatial.SOUTH_DEGREE;
+			break;
+		case WEST:
+			absoluteDegree = WorldSpatial.WEST_DEGREE;
+		default:
+			break;
+		}
+	}
+	
 	private void recoverHealth(ArrayList<Coordinate> path) {
 		/* case the command is Staying here to heal the health */
 		if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
