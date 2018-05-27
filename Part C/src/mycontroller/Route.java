@@ -67,15 +67,15 @@ public class Route {
 			
 			// entering lava incurs great cost
 			if (PerceptionModule.isLava(coor, knownMap)) {
-				cost += 20;
+				cost += 15;
 				
 				// track back the tile behind the car, if it is not in the route, the car
-				//  will be at a low speed, entering lava with low speed costs more health
+				// will be at a low speed, entering lava with low speed costs more health
 				if (!path.contains(backwardTwoCoor)) {
-					cost += 4;
+					cost += 1;
 				}
 				if (!path.contains(backwardThreeCoor)) {
-					cost += 2;
+					cost += 1;
 				}
 				
 				// entering lava with a wall forward, means u can not speed up and leave,
