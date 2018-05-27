@@ -51,9 +51,11 @@ public class ActionModule {
 		//System.out.println(path);
 		switch (this.car.getMode()) {
 		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)5);
-		case DESTINATION:
 			this.StraightLineModule.setMaxSpeed((float)2.5);
+			break;
+		case DESTINATION:
+			this.StraightLineModule.setMaxSpeed((float)5);
+			break;
 		}
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();

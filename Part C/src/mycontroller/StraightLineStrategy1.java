@@ -13,15 +13,16 @@ public class StraightLineStrategy1 implements StraightLineStrategy{
 	@Override
 	public void setMaxSpeed(float newMaxSpeed){
 		this.maxSpeed = newMaxSpeed;
+		System.out.println(this.maxSpeed);
 	}
 	
 	@Override
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
-		
-		
 		if (this.car.getSpeed() < this.maxSpeed) {
 			this.car.applyForwardAcceleration();
+		} else {
+			this.car.applyBrake();
 		}
-		
+		 
 	}
 }
