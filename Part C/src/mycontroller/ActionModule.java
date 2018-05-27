@@ -48,8 +48,6 @@ public class ActionModule {
 		
 		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
 		
-		
-		
 		/* case: we are one a lava */
 		if (PerceptionModule.isLava(currentPos, knownMap)) {
 			if(this.reverseLavaEscaptorNeeded(path)) {
@@ -73,6 +71,10 @@ public class ActionModule {
 			
 			if (currentDirection.equals(nextDirection)) {
 				/* Case: on a Straight line */
+				if (this.needAligh(currentDirection)) {
+					this.turn(delta, currentDirection);
+					return;
+				}
 				
 				//get future turning position info
 				Coordinate futurePos = this.getNextTurnPosition(path);
@@ -185,12 +187,12 @@ public class ActionModule {
 	}
 	
 	/*different kinds of motion module */
-	private void adjustAngle(Direction currentDirection) {
+	private boolean needAligh(Direction currentDirection) {
 		float currentAngle = this.carController.getAngle();
 		int absoluteDegree = 0;
 		switch (currentDirection) {
 		case EAST:
-			absoluteDegree = WorldSpatial.EAST_DEGREE_MAX;
+			absoluteDegree = WorldSpatial.EAST_DEGREE_MIN;
 			break;
 		case NORTH:
 			absoluteDegree = WorldSpatial.NORTH_DEGREE;
@@ -202,6 +204,12 @@ public class ActionModule {
 			absoluteDegree = WorldSpatial.WEST_DEGREE;
 		default:
 			break;
+		}
+		
+		if (Math.abs(currentAngle - (float) absoluteDegree) > 1) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
