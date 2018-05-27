@@ -186,40 +186,6 @@ public class ActionModule {
 	}
 
 	
-	private boolean detectFrontWall() {
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
-		Coordinate nextPos;
-		switch (this.car.getOrientation()) {
-		case NORTH:
-			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y+1));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case SOUTH:
-			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y-1));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case WEST:
-			nextPos = new Coordinate((currentPos.x-1)+","+(currentPos.y));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case EAST:
-			nextPos = new Coordinate((currentPos.x+1)+","+(currentPos.y));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		default:
-			return false;
-		}
-	}
-	
 	
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
