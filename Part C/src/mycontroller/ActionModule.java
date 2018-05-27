@@ -10,8 +10,8 @@ import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 public class ActionModule {
-	private MyAIController carController;
 	
+	private MyAIController carController;
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
 	
@@ -32,10 +32,21 @@ public class ActionModule {
 		this.carController.applyReverseAcceleration();
 	}
 	
+	public Coordinate getNextTurnPosition(ArrayList<Coordinate> path) {
+		if (path.size() >= 3) {
+			return path.get(2);
+		} else {
+			return path.get(1);
+		}
+	}
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
 		
+		//Get current position information
+		float accurate_x = this.carController.getX();
+		float accurate_y = this.carController.getY();
+		WorldSpatial.Direction currentDirection = this.carController.getOrientation();
 		Coordinate currentPos = new Coordinate(this.carController.getPosition());
 		
 		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
@@ -55,34 +66,25 @@ public class ActionModule {
 			this.recoverHealth(path);
 		} else {
 		/* case: normal route, multiple element in arrayList */
-			Coordinate nextPos = path.get(1); //as 0th element in list is our position
-			float accurate_x = this.carController.getX();
-			float accurate_y = this.carController.getY();
-			WorldSpatial.Direction currentDirection = this.carController.getOrientation();
-	
-				    
+			
+			//Get next position's info
+			Coordinate nextPos = path.get(1); //as 0th element in list is our position	    
 			float x_dir = nextPos.x-accurate_x;
 			float y_dir = nextPos.y-accurate_y;
 			Direction nextDirection = this.getDirection(x_dir, y_dir);
+			
 			System.out.println(String.format("next:%s, current:%s, currentDirection:%s, nextDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, nextDirection,
 					accurate_x, accurate_y));
 			
 			if (currentDirection.equals(nextDirection)) {
 				//Case: on a Straight line
 				
-				Coordinate futurePos;
-				if (path.size() >= 3) {
-					futurePos = path.get(2);
-				} else {
-					futurePos = path.get(1);
-				}
-				
-				
+				//check whether there is going to be a turning poiint
+				Coordinate futurePos = this.getNextTurnPosition(path);
 				float future_x_dir = futurePos.x - accurate_x;
 				float future_y_dir = futurePos.y - accurate_y;
 				Direction futureDirection = this.getDirection(future_x_dir, future_y_dir);
 
-				System.out.println(futureDirection);
 				//If there is going to be a turn
 				if (!currentDirection.equals(futureDirection) && this.carController.getSpeed() > 1.7) {
 					this.slowDown();
