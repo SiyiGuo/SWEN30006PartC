@@ -11,7 +11,6 @@ import world.WorldSpatial.Direction;
 public class TurningStrategy2 implements TurningStrategy{
 	private MyAIController carController;
 	
-	private final float maxTurningSpeed = (float) 0.2;
 	public enum WallPosition {FRONT, FOLLOWING, NOWALL};
 	public TurningStrategy2(MyAIController car) {
 		this.carController = car;
@@ -28,6 +27,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
+		private final float maxTurningSpeed = (float) 0.2;
 		/* case maximum turning speed */
 		if (this.carController.getSpeed() > maxTurningSpeed) {
 			this.slowDown();
