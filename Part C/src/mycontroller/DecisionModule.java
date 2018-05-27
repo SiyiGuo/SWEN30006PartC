@@ -149,7 +149,7 @@ public class DecisionModule {
 			Coordinate[] neighbours = {lastNodeEast, lastNodeNorth, lastNodeWest, lastNodeSouth};
 			for (int i = 0; i < neighbours.length; i++) {
 				
-				if (canDriveOn(this.roadMap.get(neighbours[i]))) {
+				if (this.roadMap.containsKey(neighbours[i]) && canDriveOn(this.roadMap.get(neighbours[i]))) {
 					if (!path.contains(neighbours[i])) {
 						Route routeCopy = new Route(route);
 						routeCopy.addNode(neighbours[i], i, this.controller.getKnownMap());

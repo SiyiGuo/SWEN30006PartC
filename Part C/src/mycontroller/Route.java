@@ -54,15 +54,15 @@ public class Route {
 			}
 			// turning incurs speed reducing, add cost.
 			if (turning) {
-				cost += 5;
+				cost += 3;
 				// speed reducing can be deadly in a lava tile.
 				if (PerceptionModule.isLava(previousCoor, knownMap))
-					cost += 100;
+					cost += 200;
 			}
 			
 			// entering lava incurs great cost
 			if (PerceptionModule.isLava(coor, knownMap)) {
-				cost += 15;
+				cost += 40;
 				
 				// track back the tile behind the car, if it is not in the route, the car
 				//  will be at a low speed, entering lava with low speed costs more health
@@ -76,7 +76,7 @@ public class Route {
 				// entering lava with a wall forward, means u can not speed up and leave,
 				// must turn or reverse to exit lava, can be slow and deadly
 				if (PerceptionModule.isWall(forwardCoor, knownMap))
-					cost += 100;
+					cost += 200;
 			}
 			
 			// rewards for passing a health trap
