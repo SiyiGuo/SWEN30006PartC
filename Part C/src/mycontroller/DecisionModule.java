@@ -130,7 +130,6 @@ public class DecisionModule {
 			ArrayList<Coordinate> path = route.getPath(); // try expand the route from last node in the path
 			Coordinate lastNode = path.get(path.size() - 1);
 			if (route.getCost() > costs.get(new Position(lastNode, route.getCurrentDirection()))) {
-				System.out.println("abandon route of cost" + route.getCost());
 				continue;
 			}
 			
@@ -237,25 +236,17 @@ public class DecisionModule {
 	}
 	
 	/**
-	 * selection sort algorithm.
+	 * insertion sort on last element.
 	 */	
 	public ArrayList<Route> routesSort(ArrayList<Route> routes) {
-		int minCost, minIndex;
-		Route temp;
+		Route last = routes.remove(routes.size() - 1);
 		for (int i = 0; i < routes.size(); i++) {
-			minCost = routes.get(i).getCost();
-			minIndex = i;
-			for (int j = i; j < routes.size(); j++) {
-				if (routes.get(j).getCost() < minCost) {
-					minCost = routes.get(j).getCost();
-					minIndex = j;
-				}
-			}
-			if (minIndex != i) {
-				temp = routes.remove(minIndex);
-				routes.add(i, temp);
+			if (routes.get(i).getCost() > last.getCost()) {
+				routes.add(i, last);
+				return routes;
 			}
 		}
+		routes.add(last);
 		return routes;
 	}
 	
