@@ -25,14 +25,6 @@ public class ActionModule {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
 		
-		switch (this.carController.getMode()) {
-		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)5);
-			break;
-		case DESTINATION:
-			this.StraightLineModule.setMaxSpeed((float)5);
-			break;
-		}
 		
 		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
 		if (knownMap.get(new Coordinate(this.carController.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.carController.getPosition()))).getTrap().equals("lava")) {
