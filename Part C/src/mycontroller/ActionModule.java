@@ -27,6 +27,11 @@ public class ActionModule {
 			this.carController.applyBrake();;
 		}
 	}
+	
+	public void escapeLava() {
+		this.carController.applyReverseAcceleration();
+	}
+	
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
@@ -37,8 +42,9 @@ public class ActionModule {
 		
 		/* case: we are one a lava */
 		if (PerceptionModule.isLava(currentPos, knownMap)) {
-			if(this.reverseLavaEscaptorApplied(path)) {
+			if(this.reverseLavaEscaptorNeeded(path)) {
 				/* case: we have escape this lava immediately */
+				this.escapeLava();
 				return;
 			}
 			/* case: no need to escape, follow plan*/
@@ -127,7 +133,7 @@ public class ActionModule {
 		}
 	}
 	
-	public boolean reverseLavaEscaptorApplied(ArrayList<Coordinate> path) {
+	public boolean reverseLavaEscaptorNeeded(ArrayList<Coordinate> path) {
 		System.out.println("escape");
 		Coordinate nextPos;
 		try {
@@ -151,25 +157,21 @@ public class ActionModule {
 		switch (currentDirection) {
 		case EAST:
 			if (nextDirection == Direction.WEST) {
-				this.carController.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case WEST:
 			if (nextDirection == Direction.EAST) {
-				this.carController.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case SOUTH:
 			if (nextDirection == Direction.NORTH) {
-				this.carController.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case NORTH:
 			if (nextDirection == Direction.SOUTH) {
-				this.carController.applyReverseAcceleration();
 				return true;
 			}
 			return false;
