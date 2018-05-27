@@ -14,10 +14,9 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
-		float turning_ratio = (float)1;
 		if ((currentDegree != absoluteDegree)) {
 			
-			if (this.car.getSpeed() > 0.1) {
+			if (this.car.getSpeed() > 0.10) {
 				this.car.applyBrake();
 			} else {
 				this.car.applyReverseAcceleration();
@@ -27,15 +26,15 @@ public class TurningStrategy2 implements TurningStrategy{
 			
 			if ((currentDegree - absoluteDegree) >= 0 ) {
 				if (Math.abs(currentDegree - absoluteDegree) <= Math.abs(360 - currentDegree + absoluteDegree)) {
-					this.car.turnLeft(turning_ratio*delta);
+					this.car.turnLeft(delta);
 				} else {
-					this.car.turnRight(turning_ratio*delta);
+					this.car.turnRight(delta);
 				}
 			} else {
 				if (Math.abs(absoluteDegree-currentDegree) < Math.abs(360 + currentDegree - absoluteDegree)) {
-					this.car.turnRight(turning_ratio*delta);
+					this.car.turnRight(delta);
 				} else {
-					this.car.turnLeft(turning_ratio*delta);
+					this.car.turnLeft(delta);
 				}
 			}
 		}  else {
