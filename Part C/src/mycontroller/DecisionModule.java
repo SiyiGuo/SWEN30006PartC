@@ -260,7 +260,7 @@ public class DecisionModule {
 		
 		for (int i = 0; i < path.size(); i++) {
 			if (PerceptionModule.isHealth(path.get(i), this.controller.getKnownMap())) {
-				for (int j = i + 1; j < path.size(); j++)
+				for (int j = path.size() - 1; j > i; j--)
 					path.remove(j);
 			}
 		}
