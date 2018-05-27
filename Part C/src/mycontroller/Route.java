@@ -67,7 +67,7 @@ public class Route {
 			
 			// entering lava incurs great cost
 			if (PerceptionModule.isLava(coor, knownMap)) {
-				cost += 40;
+				cost += 20;
 				
 				// track back the tile behind the car, if it is not in the route, the car
 				//  will be at a low speed, entering lava with low speed costs more health
@@ -85,8 +85,8 @@ public class Route {
 			}
 			
 			// rewards for passing a health trap
-			if (PerceptionModule.isHealth(coor, knownMap)) {
-				cost -= 2;
+			if (PerceptionModule.isHealth(coor, knownMap) && numOfHealthOnPath(path, knownMap) == 0) {
+				cost -= 5;
 			}
 		}
 
@@ -120,6 +120,14 @@ public class Route {
 		int count = 0;
 		for (Coordinate coor: path) {
 			if (PerceptionModule.isLava(coor, knownMap)) count++;
+		}
+		return count;
+	}
+	
+	public static int numOfHealthOnPath(ArrayList<Coordinate> path, HashMap<Coordinate, MapTile> knownMap) {
+		int count = 0;
+		for (Coordinate coor: path) {
+			if (PerceptionModule.isHealth(coor, knownMap)) count++;
 		}
 		return count;
 	}
