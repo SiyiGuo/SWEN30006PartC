@@ -10,22 +10,25 @@ import utilities.Coordinate;
 import world.Car;
 
 public class PerceptionModule {
-	private Car car;
-	private MyAIController controller;
 	private ArrayList<Coordinate> unsearched;
 	private HashMap<Coordinate, MapTile> knownMap;
 	private HashMap<Integer, Coordinate> keyMap;
 	private ArrayList<Coordinate> exits;
+	private ArrayList<Coordinate> healths;
 	
-	public PerceptionModule(MyAIController controller, Car car) {
-		this.car = car;
-		this.controller = controller;
+	/**
+	 * a perception module is a car's detector and memory module
+	 * @param controller
+	 * @param car
+	 */
+	public PerceptionModule(HashMap<Coordinate, MapTile> knownMap) {
 		
-		// knownMap is the whole map with all the trap tiles hiden.
-		this.knownMap = controller.getMap();
+		// knownMap is the whole map with all the trap tiles hidden.
 		this.keyMap = new HashMap<Integer, Coordinate>();
 		this.unsearched = new ArrayList<Coordinate>();
 		this.exits = new ArrayList<Coordinate>();
+		this.healths = new ArrayList<Coordinate>();
+		this.knownMap = knownMap;
 		for (Coordinate coor: knownMap.keySet()) {
 			if (knownMap.get(coor).isType(MapTile.Type.ROAD))
 				this.unsearched.add(coor);
@@ -33,20 +36,33 @@ public class PerceptionModule {
 				this.exits.add(coor);
 		}
 	}
-
-	public boolean isLava(Coordinate coor) {
-		if (!this.knownMap.containsKey(coor)) {
+	
+	/**
+	 * check if a given coordinate is in the map and if is a a lava trap
+	 * @param coor is the Coordinate to check
+	 * @param knownMap is a map recorded by the PerceptionModule
+	 * @return
+	 */
+	public static boolean isLava(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
+		if (!knownMap.containsKey(coor)) {
 			return false;
 		}
 		MapTile tile = knownMap.get(coor);
 		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("lava")) {
 			return true;
-		}else
+		}else {
 			return false;
+		}
 	}
-	
-	public boolean isHealth(Coordinate coor) {
-		if (!this.knownMap.containsKey(coor)) {
+
+	/**
+	 * check if a given coordinate is in the map and if is a a health trap
+	 * @param coor is the Coordinate to check
+	 * @param knownMap is a map recorded by the PerceptionModule
+	 * @return
+	 */
+	public static boolean isHealth(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
+		if (!knownMap.containsKey(coor)) {
 			return false;
 		}
 		MapTile tile = knownMap.get(coor);
@@ -55,11 +71,29 @@ public class PerceptionModule {
 		}else
 			return false;
 	}
-	
-	public void update() {
 
-		// Gets what the car can see
-		HashMap<Coordinate, MapTile> currentView = this.controller.getView();
+	/**
+	 * check if a given coordinate is in the map and if is a a wall
+	 * @param coor is the Coordinate to check
+	 * @param knownMap is a map recorded by the PerceptionModule
+	 * @return
+	 */
+	public static boolean isWall(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
+		if (!knownMap.containsKey(coor)) {
+			return false;
+		}
+		MapTile tile = knownMap.get(coor);
+		if (tile.isType(MapTile.Type.WALL)) {
+			return true;
+		}else
+			return false;
+	}
+	
+	/**
+	 * record what the car detected at the current position into the knownMap
+	 * @param currentView is what car detected at the current position
+	 */
+	public void update(HashMap<Coordinate, MapTile> currentView) {
 		
 		// update what the car have seen, check the keys.
 		for (Coordinate coor: currentView.keySet()) {
@@ -76,6 +110,9 @@ public class PerceptionModule {
 						if (lava.getKey() != 0) {
 							this.keyMap.put(lava.getKey(), coor);
 						}
+					}
+					if (trap.getTrap().equals("health")){
+						healths.add(coor);
 					}
 				}
 			}
@@ -95,13 +132,7 @@ public class PerceptionModule {
 	}
 	
 	public ArrayList<Coordinate> getHealthTraps(){
-		ArrayList<Coordinate> healths = new ArrayList<Coordinate>();
-		for(Coordinate coor: knownMap.keySet()) {
-			if (isHealth(coor)) {
-				healths.add(coor);
-			}
-		}
-		return healths;
+		return this.healths;
 	}
 	
 	public ArrayList<Coordinate> getUnsearched(){

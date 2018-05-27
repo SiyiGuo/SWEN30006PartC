@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate; 
 
 public class Route {
@@ -57,12 +56,12 @@ public class Route {
 			if (turning) {
 				cost += 5;
 				// speed reducing can be deadly in a lava tile.
-				if (isLava(previousCoor, knownMap))
+				if (PerceptionModule.isLava(previousCoor, knownMap))
 					cost += 100;
 			}
 			
 			// entering lava incurs great cost
-			if (isLava(coor, knownMap)) {
+			if (PerceptionModule.isLava(coor, knownMap)) {
 				cost += 15;
 				
 				// track back the tile behind the car, if it is not in the route, the car
@@ -76,50 +75,15 @@ public class Route {
 				
 				// entering lava with a wall forward, means u can not speed up and leave,
 				// must turn or reverse to exit lava, can be slow and deadly
-				if (isWall(forwardCoor, knownMap))
+				if (PerceptionModule.isWall(forwardCoor, knownMap))
 					cost += 100;
 			}
 			
 			// rewards for passing a health trap
-			if (isHealth(coor, knownMap)) {
+			if (PerceptionModule.isHealth(coor, knownMap)) {
 				cost -= 1;
 			}
 		}
-	}
-	
-	
-	public static boolean isLava(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
-		if (!knownMap.containsKey(coor)) {
-			return false;
-		}
-		MapTile tile = knownMap.get(coor);
-		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("lava")) {
-			return true;
-		}else {
-			return false;
-		}
-	}
-	
-	public static boolean isHealth(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
-		if (!knownMap.containsKey(coor)) {
-			return false;
-		}
-		MapTile tile = knownMap.get(coor);
-		if (tile.isType(MapTile.Type.TRAP) && ((TrapTile)tile).getTrap().equals("health")) {
-			return true;
-		}else
-			return false;
-	}
-	
-	public static boolean isWall(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
-		if (!knownMap.containsKey(coor)) {
-			return false;
-		}
-		MapTile tile = knownMap.get(coor);
-		if (tile.isType(MapTile.Type.WALL)) {
-			return true;
-		}else
-			return false;
 	}
 
 	/**

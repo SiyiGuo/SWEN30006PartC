@@ -20,7 +20,7 @@ public class MyAIController extends CarController{
 		
 		public MyAIController(Car car) {
 			super(car);
-			this.pModule = new PerceptionModule(this, car); 
+			this.pModule = new PerceptionModule(getMap()); 
 		    this.dModule = new DecisionModule(this, car); 
 		    this.aModule = new ActionModule(this);
 		} 
@@ -37,7 +37,7 @@ public class MyAIController extends CarController{
 		public void update(float delta) {
 			
 			// Gets what the car can see
-			pModule.update(); 
+			pModule.update(getView()); 
 
 			// Deciding the path
 		    path = dModule.generatePath();
