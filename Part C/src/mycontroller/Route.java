@@ -34,6 +34,7 @@ public class Route {
 	 * this method add a new node to a route and updates its cost.
 	 */
 	public void addNode(Coordinate coor, int direction, HashMap<Coordinate, MapTile> knownMap) {
+		//System.out.println("path was " + this.path.toString() + "\ncost was "+this.cost);
 		switch (this.path.size()) {
 		case(0):
 			this.path.add(coor);
@@ -81,9 +82,11 @@ public class Route {
 			
 			// rewards for passing a health trap
 			if (PerceptionModule.isHealth(coor, knownMap)) {
-				cost -= 1;
+				cost -= 5;
 			}
 		}
+
+		//System.out.println("path now " + this.path.toString() + "\ncost now "+this.cost+"\n");
 	}
 
 	/**
@@ -107,6 +110,14 @@ public class Route {
 			break;			
 		}
 		return new Coordinate(x+","+y);
+	}
+	
+	public static int numOfLavaOnPath(ArrayList<Coordinate> path, HashMap<Coordinate, MapTile> knownMap) {
+		int count = 0;
+		for (Coordinate coor: path) {
+			if (PerceptionModule.isLava(coor, knownMap)) count++;
+		}
+		return count;
 	}
 	
 	public int getCurrentDirection() {

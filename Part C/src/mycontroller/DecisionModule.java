@@ -10,7 +10,7 @@ import world.Car;
 public class DecisionModule {
 	public enum Mode{SEARCHING, DESTINATION};
 	public static final String DONOTHING = "99,99";
-	public static final int LOWHEALTHTHRESHOLD = 20;
+	public static final int LOWHEALTHTHRESHOLD = 30;
 	public static final int RECOVERTHRESHOLD = 90;
 	public static final float STOPTHRESHOLD = 1.5f;
 	public static final int EAST = 0;
@@ -19,7 +19,8 @@ public class DecisionModule {
 	public static final int SOUTH = 3;
 	public static final int MAXCOST = 999999;
 	private static final int MAXESCAPESEARCHRANGE = 10;
-	private static final int TURNPUNISHMENT = 3;
+	private static final int TURNPUNISHMENT = 5;
+	private static final int REVERSEPUNISHMENT = 3;
 	
 	private Car car;
 	private MyAIController controller;
@@ -27,6 +28,7 @@ public class DecisionModule {
 	private HashMap<Coordinate, MapTile> roadMap;
 	private Coordinate positionWhenLastFindPath;
 	private ArrayList<Coordinate> lastPath;
+	private int lastPathLavaCount;
 	private Mode mode;
 	
 	public DecisionModule(MyAIController controller, Car car) {
@@ -100,11 +102,12 @@ public class DecisionModule {
 		}		
 
 		// avoid repeatedly generating path
-		if (lastPath != null && pathLeadToDestinations(destinations, lastPath) && lastPath.contains(currentCoor)) {
+		if (lastPath != null && pathLeadToDestinations(destinations, lastPath) && lastPath.contains(currentCoor) 
+			&& lastPathLavaCount == Route.numOfLavaOnPath(lastPath, this.controller.getKnownMap())) {
 			for (int i = lastPath.indexOf(currentCoor); i > 0; i--) {
 				lastPath.remove(i - 1);
 			}
-			System.out.println("returning lastPath");
+			lastPathLavaCount = Route.numOfLavaOnPath(lastPath, this.controller.getKnownMap());
 			return lastPath;
 		}
 		
@@ -126,6 +129,9 @@ public class DecisionModule {
 			route = routes.remove(0);  // read the first(lowest cost) route from queue.
 			ArrayList<Coordinate> path = route.getPath(); // try expand the route from last node in the path
 			Coordinate lastNode = path.get(path.size() - 1);
+			if (route.getCost() > costs.get(new Position(lastNode, route.getCurrentDirection())))
+				continue;
+			
 			
 			if (destinations.contains(lastNode)) {
 				
@@ -136,6 +142,7 @@ public class DecisionModule {
 					path = processWithLavaEscapeStrategy(path, route.getCurrentDirection());
 				}
 				this.lastPath = new ArrayList<Coordinate>(path);
+				this.lastPathLavaCount = Route.numOfLavaOnPath(lastPath, this.controller.getKnownMap());
 				return path;
 			}
 			
@@ -203,14 +210,14 @@ public class DecisionModule {
 		rresult = this.escapeSearch(lastNode, right, path);
 
 		min = fresult != null && fresult.size() < min? fresult.size(): min;
-		min = bresult != null && bresult.size() < min? bresult.size(): min;
+		min = bresult != null && bresult.size() + REVERSEPUNISHMENT < min? bresult.size() + REVERSEPUNISHMENT: min;
 		min = lresult != null && lresult.size() + TURNPUNISHMENT < min? lresult.size() + TURNPUNISHMENT: min;
 		min = rresult != null && rresult.size() + TURNPUNISHMENT < min? rresult.size() + TURNPUNISHMENT: min;
 
 		if(fresult != null && min == fresult.size()) return fresult;
-		if(fresult != null && min == bresult.size()) return bresult;
-		if(fresult != null && min == lresult.size() + TURNPUNISHMENT) return lresult;
-		if(fresult != null && min == rresult.size() + TURNPUNISHMENT) return rresult;
+		if(bresult != null && min == bresult.size() + REVERSEPUNISHMENT) return bresult;
+		if(lresult != null && min == lresult.size() + TURNPUNISHMENT) return lresult;
+		if(rresult != null && min == rresult.size() + TURNPUNISHMENT) return rresult;
 		return path;
 	}
 	
