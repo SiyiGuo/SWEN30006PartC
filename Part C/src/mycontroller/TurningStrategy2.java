@@ -16,7 +16,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
 		if ((currentDegree != absoluteDegree)) {
 			
-			if (this.car.getSpeed() > 0.10) {
+			if (this.car.getSpeed() > 0.05) {
 				this.car.applyBrake();
 			} else {
 				this.car.applyReverseAcceleration();
