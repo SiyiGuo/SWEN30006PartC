@@ -1,11 +1,9 @@
 package mycontroller;
 
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import tiles.MapTile;
 import utilities.Coordinate;
-import world.Car;
 import world.WorldSpatial.Direction;
 
 public class TurningStrategy2 implements TurningStrategy{

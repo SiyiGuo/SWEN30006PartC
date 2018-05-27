@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;
@@ -39,6 +38,7 @@ public class ActionModule {
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
+		System.out.println("currAngle: " + this.carController.getAngle());
 		
 		//Get current position information
 		float accurate_x = this.carController.getX();
@@ -71,6 +71,10 @@ public class ActionModule {
 			
 			if (currentDirection.equals(nextDirection)) {
 				/* Case: on a Straight line */
+				if (this.needAligh(currentDirection)) {
+					this.turn(delta, currentDirection);
+					return;
+				}
 				
 				//get future turning position info
 				Coordinate futurePos = this.getNextTurnPosition(path);
@@ -183,6 +187,32 @@ public class ActionModule {
 	}
 	
 	/*different kinds of motion module */
+	private boolean needAligh(Direction currentDirection) {
+		float currentAngle = this.carController.getAngle();
+		int absoluteDegree = 0;
+		switch (currentDirection) {
+		case EAST:
+			absoluteDegree = WorldSpatial.EAST_DEGREE_MIN;
+			break;
+		case NORTH:
+			absoluteDegree = WorldSpatial.NORTH_DEGREE;
+			break;
+		case SOUTH:
+			absoluteDegree = WorldSpatial.SOUTH_DEGREE;
+			break;
+		case WEST:
+			absoluteDegree = WorldSpatial.WEST_DEGREE;
+		default:
+			break;
+		}
+		
+		if (Math.abs(currentAngle - (float) absoluteDegree) > 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	private void recoverHealth(ArrayList<Coordinate> path) {
 		/* case the command is Staying here to heal the health */
 		if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
