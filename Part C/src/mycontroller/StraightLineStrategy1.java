@@ -4,7 +4,7 @@ import world.Car;
 
 public class StraightLineStrategy1 implements StraightLineStrategy{
 	private MyAIController carController;
-	private float maxSpeed = (float)2.5;
+	private float maxSpeed = (float)5;
 	
 	public StraightLineStrategy1(MyAIController car) {
 		this.carController = car;
