@@ -51,7 +51,7 @@ public class ActionModule {
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
-		//System.out.println(path);
+		System.out.println(path);
 		switch (this.car.getMode()) {
 		case SEARCHING:
 			this.StraightLineModule.setMaxSpeed((float)2.5);
@@ -117,11 +117,8 @@ public class ActionModule {
 				System.out.println(futureDirection);
 				//If there is going to be a turn
 				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.7) {
-					
-					
-					System.out.println("backward");
-					System.out.println(String.format("%s, %s", future_x_dir, future_y_dir));
 					this.car.applyReverseAcceleration();
+					
 				}else {
 					System.out.println("Move forward");
 					this.move(nextPos, accurate_x, accurate_y);

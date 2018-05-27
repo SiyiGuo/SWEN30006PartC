@@ -1,5 +1,7 @@
 package mycontroller;
 
+import java.util.concurrent.TimeUnit;
+
 import world.Car;
 
 public class TurningStrategy2 implements TurningStrategy{
@@ -11,8 +13,17 @@ public class TurningStrategy2 implements TurningStrategy{
 	@Override
 	public void turn(float delta, int absoluteDegree) {
 		if (this.car.getSpeed() > 0.5) {
+			System.out.println("stopppppppppppp!!");
+			
+			try {
+				TimeUnit.SECONDS.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			this.car.applyBrake();
-		} else {
+		}else {
 			this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
 		}
 	}
