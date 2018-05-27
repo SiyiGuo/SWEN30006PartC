@@ -82,7 +82,7 @@ public class ActionModule {
 					this.slowDown();
 				}else {
 					// case: no need to slow down
-					this.move(nextPos, accurate_x, accurate_y);
+					this.goStraight(nextPos, accurate_x, accurate_y);
 				}
 				
 			} else { 
@@ -99,19 +99,19 @@ public class ActionModule {
 	}
 	
 	/* function that help decide future direction */
-	Direction getFutureDirection(Coordinate futurePos, float accurate_x, float accurate_y) {
+	private Direction getFutureDirection(Coordinate futurePos, float accurate_x, float accurate_y) {
 		float future_x_dir = futurePos.x - accurate_x;
 		float future_y_dir = futurePos.y - accurate_y;
 		return this.getDirection(future_x_dir, future_y_dir);
 	}
 	
-	Direction getNextDirection(Coordinate nextPos, float accurate_x, float accurate_y) {
+	private Direction getNextDirection(Coordinate nextPos, float accurate_x, float accurate_y) {
 		float x_dir = nextPos.x-accurate_x;
 		float y_dir = nextPos.y-accurate_y;
 		return this.getDirection(x_dir, y_dir);
 	}
 	
-	Direction getDirection(float x_dir, float y_dir) {
+	private Direction getDirection(float x_dir, float y_dir) {
 		
 		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
 			return Direction.NORTH;
@@ -135,7 +135,7 @@ public class ActionModule {
 	
 
 	/*function that judging on the current state */
-	public boolean reverseLavaEscaptorNeeded(ArrayList<Coordinate> path) {
+	private boolean reverseLavaEscaptorNeeded(ArrayList<Coordinate> path) {
 		System.out.println("escape");
 		Coordinate nextPos;
 		try {
@@ -183,18 +183,18 @@ public class ActionModule {
 	}
 	
 	/*different kinds of motion module */
-	public void recoverHealth(ArrayList<Coordinate> path) {
+	private void recoverHealth(ArrayList<Coordinate> path) {
 		/* case the command is Staying here to heal the health */
 		if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
 			this.carController.applyBrake();;
 		}
 	}
 	
-	public void escapeLava() {
+	private void escapeLava() {
 		this.carController.applyReverseAcceleration();
 	}
 		
-	public void slowDown() {
+	private void slowDown() {
 		if (this.carController.getSpeed() > 2.5) {
 			this.carController.applyReverseAcceleration();
 		} else {
@@ -202,11 +202,11 @@ public class ActionModule {
 		}
 	}
 	
-	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
+	private void goStraight(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 	}
 		
-	public void turn(float delta, Direction direction) {
+	private void turn(float delta, Direction direction) {
 		int absoluteDegree = 0;
 		switch (direction) {
 		case EAST:
