@@ -50,11 +50,18 @@ public class ActionModule {
 		
 	}
 	
+	public void slowDown() {
+		if (this.car.getSpeed() > 2.5) {
+			this.car.applyReverseAcceleration();
+		} else {
+			this.car.applyBrake();
+		}
+	}
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println(path);
 		switch (this.car.getMode()) {
 		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)2.5);
+			this.StraightLineModule.setMaxSpeed((float)5);
 			break;
 		case DESTINATION:
 			this.StraightLineModule.setMaxSpeed((float)5);
@@ -62,20 +69,20 @@ public class ActionModule {
 		}
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
-		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
-			if (this.detectFrontWall()){
-				this.forwardLava = false;
-			}
-			if (this.forwardLava) {
-				this.car.applyForwardAcceleration();
-			} else {
-				this.car.applyReverseAcceleration();
-			}
-			
-			return;
-		} else {
-			this.forwardLava = true;
-		}
+//		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
+//			if (this.detectFrontWall()){
+//				this.forwardLava = false;
+//			}
+//			if (this.forwardLava) {
+//				this.car.applyForwardAcceleration();
+//			} else {
+//				this.car.applyReverseAcceleration();
+//			}
+//			
+//			return;
+//		} else {
+//			this.forwardLava = true;
+//		}
 		
 		if (path.size() == 1) {
 			if (path.get(0).toString().equals("99,99")) {
@@ -117,7 +124,8 @@ public class ActionModule {
 				System.out.println(futureDirection);
 				//If there is going to be a turn
 				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.7) {
-					this.car.applyReverseAcceleration();
+					this.slowDown();
+					
 					
 				}else {
 					System.out.println("Move forward");

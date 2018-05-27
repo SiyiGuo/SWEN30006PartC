@@ -18,7 +18,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
-		if (this.car.getSpeed() > 0.11) {			
+		if (this.car.getSpeed() > 0.2) {			
 			this.car.applyBrake();
 		}else {
 			if (adjust()) {
@@ -56,6 +56,21 @@ public class TurningStrategy2 implements TurningStrategy{
 		}
 	}
 	
+	public void minorBack() {
+		if (this.car.getSpeed() > 0.15) {
+			this.car.applyBrake();
+		} else {
+			this.car.applyReverseAcceleration();
+		}
+	}
+	
+	public void minorForward() {
+		if (this.car.getSpeed() > 0.15) {
+			this.car.applyBrake();
+		} else {
+			this.car.applyForwardAcceleration();
+		}
+	}
 	
 	private boolean adjust() {
 		WallPosition wallPosition = checkWall();
@@ -78,25 +93,25 @@ public class TurningStrategy2 implements TurningStrategy{
 		switch (currentDirection){
 		case WEST:
 			if (currentPos.x > x) {
-				this.car.applyReverseAcceleration();
+				this.minorBack();
 				return true;
 			}
 			return false;
 		case EAST:
 			if (currentPos.x < x) {
-				this.car.applyReverseAcceleration();
+				this.minorBack();
 				return true;
 			}
 			return false;
 		case SOUTH:
 			if (currentPos.y > y) {
-				this.car.applyReverseAcceleration();
+				this.minorBack();
 				return true;
 			}
 			return false;
 		case NORTH:
 			if (currentPos.y < y){
-				this.car.applyReverseAcceleration();
+				this.minorBack();
 				return true;
 			}
 			return false;
@@ -112,26 +127,26 @@ public class TurningStrategy2 implements TurningStrategy{
 		float y = this.car.getY();
 		switch (currentDirection){
 		case WEST:
-			if (currentPos.x > x) {
-				this.car.applyReverseAcceleration();
+			if (currentPos.x < x) {
+				this.minorForward();
 				return true;
 			}
 			return false;
 		case EAST:
-			if (currentPos.x < x) {
-				this.car.applyReverseAcceleration();
+			if (currentPos.x > x) {
+				this.minorForward();
 				return true;
 			}
 			return false;
 		case SOUTH:
 			if (currentPos.y < y) {
-				this.car.applyReverseAcceleration();
+				this.minorForward();
 				return true;
 			}
 			return false;
 		case NORTH:
 			if (currentPos.y > y){
-				this.car.applyReverseAcceleration();
+				this.minorForward();
 				return true;
 			}
 			return false;
