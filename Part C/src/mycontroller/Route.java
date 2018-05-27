@@ -1,3 +1,7 @@
+/**
+ * this file is created for project work for SWEN30006 Software Modeling Design
+ * Group 77, group members: Jihai Fan, Raymond Guo, Mofan Li
+ */
 package mycontroller;
 import java.util.ArrayList;
 import java.util.HashMap;
