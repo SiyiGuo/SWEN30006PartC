@@ -137,10 +137,12 @@ public class ActionModule {
 	}
 	
 	public boolean reverseLavaEscaptor(ArrayList<Coordinate> path) {
+		System.out.println("escape");
 		Coordinate nextPos;
 		try {
 			nextPos = path.get(1); //as 0th element in list is our position
 		} catch(Exception e) {
+			System.out.println("exception");
 			return false;
 		}
 		
@@ -153,8 +155,8 @@ public class ActionModule {
 		float x_dir = nextPos.x-accurate_x;
 		float y_dir = nextPos.y-accurate_y;
 		Direction nextDirection = this.getDirection(x_dir, y_dir);
-		
-		
+		System.out.println("escape: " + x_dir + " : " + y_dir);
+		System.out.println("escape direction: " + nextDirection);
 		switch (currentDirection) {
 		case EAST:
 			if (nextDirection == Direction.WEST) {
@@ -185,42 +187,6 @@ public class ActionModule {
 		
 	}
 
-	
-	private boolean detectFrontWall() {
-		Coordinate currentPos = new Coordinate(this.car.getPosition());
-		HashMap<Coordinate, MapTile> aroundView = this.car.getView();
-		Coordinate nextPos;
-		switch (this.car.getOrientation()) {
-		case NORTH:
-			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y+1));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case SOUTH:
-			nextPos = new Coordinate((currentPos.x)+","+(currentPos.y-1));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case WEST:
-			nextPos = new Coordinate((currentPos.x-1)+","+(currentPos.y));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		case EAST:
-			nextPos = new Coordinate((currentPos.x+1)+","+(currentPos.y));
-			if (aroundView.get(nextPos).isType(MapTile.Type.WALL)) {
-				return true;
-			}
-			return false;
-		default:
-			return false;
-		}
-	}
-	
-	
 	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 	}
