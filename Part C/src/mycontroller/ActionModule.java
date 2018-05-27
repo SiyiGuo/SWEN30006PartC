@@ -59,7 +59,7 @@ public class ActionModule {
 		}
 	}
 	
-	public void lavaEscaptor(ArrayList<Coordinate> path) {
+	public void reverseLavaEscaptor(ArrayList<Coordinate> path) {
 		Coordinate nextPos;
 		try {
 			nextPos = path.get(1); //as 0th element in list is our position
@@ -83,25 +83,21 @@ public class ActionModule {
 			if (nextDirection == Direction.WEST) {
 				this.car.applyReverseAcceleration();
 			}
-			this.car.applyForwardAcceleration();
 			return;
 		case WEST:
 			if (nextDirection == Direction.EAST) {
 				this.car.applyReverseAcceleration();
 			}
-			this.car.applyForwardAcceleration();
 			return;
 		case SOUTH:
 			if (nextDirection == Direction.NORTH) {
 				this.car.applyReverseAcceleration();
 			}
-			this.car.applyForwardAcceleration();
 			return;
 		case NORTH:
 			if (nextDirection == Direction.SOUTH) {
 				this.car.applyReverseAcceleration();
 			}
-			this.car.applyForwardAcceleration();
 			return;
 		}
 		return;
@@ -112,7 +108,7 @@ public class ActionModule {
 		System.out.println(path);
 		switch (this.car.getMode()) {
 		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)5);
+			this.StraightLineModule.setMaxSpeed((float)2.5);
 			break;
 		case DESTINATION:
 			this.StraightLineModule.setMaxSpeed((float)5);
@@ -121,8 +117,7 @@ public class ActionModule {
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
 		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
-			this.lavaEscaptor(path);
-			return;
+			this.reverseLavaEscaptor(path);
 		} 
 		
 		if (path.size() == 1) {

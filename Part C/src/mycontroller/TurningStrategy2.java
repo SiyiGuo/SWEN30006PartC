@@ -57,7 +57,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	public void minorBack() {
-		if (this.car.getSpeed() > 0.15) {
+		if (this.car.getSpeed() > 0.1) {
 			this.car.applyBrake();
 		} else {
 			this.car.applyReverseAcceleration();
@@ -65,7 +65,7 @@ public class TurningStrategy2 implements TurningStrategy{
 	}
 	
 	public void minorForward() {
-		if (this.car.getSpeed() > 0.15) {
+		if (this.car.getSpeed() > 0.1) {
 			this.car.applyBrake();
 		} else {
 			this.car.applyForwardAcceleration();
