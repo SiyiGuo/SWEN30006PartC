@@ -49,6 +49,10 @@ public class MyAIController extends CarController{
 
 		}
 		
+		public boolean isLava(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
+			return this.pModule.isLava(coor, knownMap);
+		}
+		
 		public Mode getMode() {
 			return this.dModule.getMode();
 		}

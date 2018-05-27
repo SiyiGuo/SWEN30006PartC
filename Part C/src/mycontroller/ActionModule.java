@@ -25,26 +25,30 @@ public class ActionModule {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
 		
+		Coordinate currentPos = new Coordinate(this.carController.getPosition());
 		
 		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
-		if (knownMap.get(new Coordinate(this.carController.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.carController.getPosition()))).getTrap().equals("lava")) {
-			if(this.reverseLavaEscaptor(path)) {
+		
+		/* case: we are one a lava */
+		if (PerceptionModule.isLava(currentPos, knownMap)) {
+			if(this.reverseLavaEscaptorApplied(path)) {
+				/* case: we have escape this lava immediately */
 				return;
 			}
-			
+			/* case: no need to escape, follow plan*/
 		} 
 		
+		/* case:  arraylist only has one element */
 		if (path.size() == 1) {
-			if (path.get(0).toString().equals("99,99")) {
+			/* case the command is Staying */
+			if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
 				System.out.println("Do MNothjing");
-				Coordinate currentPos = new Coordinate(this.carController.getPosition());
 				System.out.println(currentPos);
 				this.carController.applyBrake();;
 			}
 			
 		} else {
 			Coordinate nextPos = path.get(1); //as 0th element in list is our position
-			Coordinate currentPos = new Coordinate(this.carController.getPosition());
 			float accurate_x = this.carController.getX();
 			float accurate_y = this.carController.getY();
 			WorldSpatial.Direction currentDirection = this.carController.getOrientation();
@@ -122,7 +126,7 @@ public class ActionModule {
 		}
 	}
 	
-	public boolean reverseLavaEscaptor(ArrayList<Coordinate> path) {
+	public boolean reverseLavaEscaptorApplied(ArrayList<Coordinate> path) {
 		System.out.println("escape");
 		Coordinate nextPos;
 		try {
