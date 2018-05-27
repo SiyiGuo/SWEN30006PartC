@@ -199,4 +199,8 @@ public class DecisionModule {
 		}
 		return path;
 	}
+	
+	public Mode getMode() {
+		return this.mode;
+	}
 }
