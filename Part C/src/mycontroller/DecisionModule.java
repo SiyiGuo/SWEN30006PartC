@@ -100,10 +100,11 @@ public class DecisionModule {
 		}		
 
 		// avoid repeatedly generating path
-		if (lastPath != null && destinations.contains(lastPath.get(lastPath.size() - 1)) && lastPath.contains(currentCoor)) {
+		if (lastPath != null && pathLeadToDestinations(destinations, lastPath) && lastPath.contains(currentCoor)) {
 			for (int i = lastPath.indexOf(currentCoor); i > 0; i--) {
 				lastPath.remove(i - 1);
 			}
+			System.out.println("returning lastPath");
 			return lastPath;
 		}
 		
@@ -165,6 +166,12 @@ public class DecisionModule {
 		return null;
 	}
 	
+	private boolean pathLeadToDestinations(ArrayList<Coordinate> dests, ArrayList<Coordinate> path) {
+		for (int i = path.size() - 1; i >= 0; i--) {
+			if (dests.contains(path.get(i))) return true;
+		}
+		return false;
+	}
 	private ArrayList<Coordinate> escapeSearch(Coordinate lastNode, int dir, ArrayList<Coordinate> path) {
 		HashMap<Coordinate, MapTile> knownMap = this.controller.getKnownMap();
 		for (int i = 1; i <= MAXESCAPESEARCHRANGE; i++) {
