@@ -108,7 +108,7 @@ public class ActionModule {
 		System.out.println(path);
 		switch (this.car.getMode()) {
 		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)2.5);
+			this.StraightLineModule.setMaxSpeed((float)5);
 			break;
 		case DESTINATION:
 			this.StraightLineModule.setMaxSpeed((float)5);
