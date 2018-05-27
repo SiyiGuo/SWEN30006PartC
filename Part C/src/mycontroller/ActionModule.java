@@ -49,6 +49,12 @@ public class ActionModule {
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		//System.out.println(path);
+		switch (this.car.getMode()) {
+		case SEARCHING:
+			this.StraightLineModule.setMaxSpeed((float)5);
+		case DESTINATION:
+			this.StraightLineModule.setMaxSpeed((float)2.5);
+		}
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
 		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
