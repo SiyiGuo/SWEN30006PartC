@@ -100,7 +100,7 @@ public class DecisionModule {
 		}		
 
 		// avoid repeatedly generating path
-		if (this.mode == Mode.DESTINATION && destinations.contains(lastPath.get(lastPath.size() - 1))) {
+		if (lastPath != null && destinations.contains(lastPath.get(lastPath.size() - 1))) {
 			for (int i = lastPath.indexOf(currentCoor); i > 0; i--) {
 				lastPath.remove(i - 1);
 			}
