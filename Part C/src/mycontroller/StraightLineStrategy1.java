@@ -13,7 +13,7 @@ public class StraightLineStrategy1 implements StraightLineStrategy{
 	@Override
 	public void setMaxSpeed(float newMaxSpeed){
 		this.maxSpeed = newMaxSpeed;
-		System.out.println(this.maxSpeed);
+//		System.out.println(this.maxSpeed);
 	}
 	
 	@Override
