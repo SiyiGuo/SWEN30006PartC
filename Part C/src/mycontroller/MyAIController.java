@@ -2,7 +2,8 @@ package mycontroller;
 
 import java.util.HashMap; 
 import java.util.ArrayList; 
-import controller.CarController; 
+import controller.CarController;
+import mycontroller.DecisionModule.Mode;
 import tiles.LavaTrap; 
 import tiles.MapTile; 
 import tiles.TrapTile; 
@@ -46,6 +47,10 @@ public class MyAIController extends CarController{
 			aModule.drive(delta, path);
 //		    aModule.turn(delta, Direction.WEST);
 
+		}
+		
+		public Mode getMode() {
+			return this.dModule.getMode();
 		}
 		
 		public HashMap<Coordinate, MapTile> getKnownMap(){
