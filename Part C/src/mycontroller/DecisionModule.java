@@ -103,7 +103,7 @@ public class DecisionModule {
 
 		// avoid repeatedly generating path
 		if (lastPath != null && pathLeadToDestinations(destinations, lastPath) && lastPath.contains(currentCoor) 
-			&& lastPathLavaCount == Route.numOfLavaOnPath(lastPath, this.controller.getKnownMap())) {
+			&& lastPathLavaCount >= Route.numOfLavaOnPath(lastPath, this.controller.getKnownMap())) {
 			for (int i = lastPath.indexOf(currentCoor); i > 0; i--) {
 				lastPath.remove(i - 1);
 			}
@@ -129,9 +129,10 @@ public class DecisionModule {
 			route = routes.remove(0);  // read the first(lowest cost) route from queue.
 			ArrayList<Coordinate> path = route.getPath(); // try expand the route from last node in the path
 			Coordinate lastNode = path.get(path.size() - 1);
-			if (route.getCost() > costs.get(new Position(lastNode, route.getCurrentDirection())))
+			if (route.getCost() > costs.get(new Position(lastNode, route.getCurrentDirection()))) {
+				System.out.println("abandon route of cost" + route.getCost());
 				continue;
-			
+			}
 			
 			if (destinations.contains(lastNode)) {
 				
@@ -163,7 +164,8 @@ public class DecisionModule {
 						newPos = new Position(neighbours[i], i);
 						if (route.getCost() < costs.get(newPos)) {
 							costs.put(newPos, routeCopy.getCost());
-							routes = insertRoute(routes, routeCopy);
+							routes.add(routeCopy);
+							routes = routesSort(routes);
 						}
 					}
 				}
@@ -235,16 +237,25 @@ public class DecisionModule {
 	}
 	
 	/**
-	 * insert a route into the queue of routes with insertion sort algorithm.
-	 */
-	public ArrayList<Route> insertRoute(ArrayList<Route> routes, Route route) {
-		for (int i = 0; i < routes.size() - 1; i++) {
-			if (route.getCost() < routes.get(i).getCost()) {
-				routes.add(i, route);
-				return routes;
+	 * selection sort algorithm.
+	 */	
+	public ArrayList<Route> routesSort(ArrayList<Route> routes) {
+		int minCost, minIndex;
+		Route temp;
+		for (int i = 0; i < routes.size(); i++) {
+			minCost = routes.get(i).getCost();
+			minIndex = i;
+			for (int j = i; j < routes.size(); j++) {
+				if (routes.get(j).getCost() < minCost) {
+					minCost = routes.get(j).getCost();
+					minIndex = j;
+				}
+			}
+			if (minIndex != i) {
+				temp = routes.remove(minIndex);
+				routes.add(i, temp);
 			}
 		}
-		routes.add(route);
 		return routes;
 	}
 	

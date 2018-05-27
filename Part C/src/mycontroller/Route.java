@@ -49,13 +49,17 @@ public class Route {
 			this.path.add(coor);
 			cost++;
 			boolean turning = false;
+			boolean reversing = false;
 			if (direction != currentDirection) {
 				currentDirection = direction;
 				turning = true;
+				if (Math.abs(currentDirection - direction) == 2) 
+					reversing = true;
 			}
 			// turning incurs speed reducing, add cost.
 			if (turning) {
 				cost += 3;
+				if (reversing) cost += 3;
 				// speed reducing can be deadly in a lava tile.
 				if (PerceptionModule.isLava(previousCoor, knownMap))
 					cost += 200;
@@ -63,15 +67,15 @@ public class Route {
 			
 			// entering lava incurs great cost
 			if (PerceptionModule.isLava(coor, knownMap)) {
-				cost += 40;
+				cost += 20;
 				
 				// track back the tile behind the car, if it is not in the route, the car
 				//  will be at a low speed, entering lava with low speed costs more health
 				if (!path.contains(backwardTwoCoor)) {
-					cost += 10;
+					cost += 4;
 				}
 				if (!path.contains(backwardThreeCoor)) {
-					cost += 5;
+					cost += 2;
 				}
 				
 				// entering lava with a wall forward, means u can not speed up and leave,
@@ -81,7 +85,7 @@ public class Route {
 			}
 			
 			// rewards for passing a health trap
-			if (PerceptionModule.isHealth(coor, knownMap)) {
+			if (PerceptionModule.isHealth(coor, knownMap) && numOfHealthOnPath(path, knownMap) == 0) {
 				cost -= 5;
 			}
 		}
@@ -116,6 +120,14 @@ public class Route {
 		int count = 0;
 		for (Coordinate coor: path) {
 			if (PerceptionModule.isLava(coor, knownMap)) count++;
+		}
+		return count;
+	}
+	
+	public static int numOfHealthOnPath(ArrayList<Coordinate> path, HashMap<Coordinate, MapTile> knownMap) {
+		int count = 0;
+		for (Coordinate coor: path) {
+			if (PerceptionModule.isHealth(coor, knownMap)) count++;
 		}
 		return count;
 	}
