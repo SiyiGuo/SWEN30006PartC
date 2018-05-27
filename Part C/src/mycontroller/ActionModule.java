@@ -21,6 +21,12 @@ public class ActionModule {
 		this.TurningModule = new TurningStrategy2(this.carController);
 	}
 	
+	public void recoverHealth(ArrayList<Coordinate> path) {
+		/* case the command is Staying here to heal the health */
+		if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
+			this.carController.applyBrake();;
+		}
+	}
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
 		System.out.println("curr Pos: " + this.carController.getPosition());
@@ -38,16 +44,11 @@ public class ActionModule {
 			/* case: no need to escape, follow plan*/
 		} 
 		
-		/* case:  arraylist only has one element */
+		/* case:  arrayList only has one element */
 		if (path.size() == 1) {
-			/* case the command is Staying */
-			if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
-				System.out.println("Do MNothjing");
-				System.out.println(currentPos);
-				this.carController.applyBrake();;
-			}
-			
+			this.recoverHealth(path);
 		} else {
+		/* case: normal route, multiple element in arrayList */
 			Coordinate nextPos = path.get(1); //as 0th element in list is our position
 			float accurate_x = this.carController.getX();
 			float accurate_y = this.carController.getY();
