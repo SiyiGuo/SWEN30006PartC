@@ -65,35 +65,33 @@ public class ActionModule {
 		/* case: normal route, multiple element in arrayList */
 			
 			//Get next position's info
-			Coordinate nextPos = path.get(nextPosPathIndex); //as 0th element in list is our position	    
-			float x_dir = nextPos.x-accurate_x;
-			float y_dir = nextPos.y-accurate_y;
-			Direction nextDirection = this.getDirection(x_dir, y_dir);
+			Coordinate nextPos = path.get(nextPosPathIndex); //as 0th element in list is our position	  
+			Direction nextDirection = this.getNextDirection(nextPos, accurate_x, accurate_y);
 			
-			System.out.println(String.format("next:%s, current:%s, currentDirection:%s, nextDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, nextDirection,
-					accurate_x, accurate_y));
 			
 			if (currentDirection.equals(nextDirection)) {
 				/* Case: on a Straight line */
 				
-				//check whether there is going to be a turning point
+				//get future turning position info
 				Coordinate futurePos = this.getNextTurnPosition(path);
-				float future_x_dir = futurePos.x - accurate_x;
-				float future_y_dir = futurePos.y - accurate_y;
-				Direction futureDirection = this.getDirection(future_x_dir, future_y_dir);
+				Direction futureDirection = this.getFutureDirection(futurePos, accurate_x, accurate_y);
 
-				//case: turn in the future
 				if (!currentDirection.equals(futureDirection) && this.carController.getSpeed() > turningThreashold) {
+					// case: turn in the future
+					// we need to slow down
 					this.slowDown();
 				}else {
+					// case: no need to slow down
 					this.move(nextPos, accurate_x, accurate_y);
 				}
 				
 			} else { 
-				/* case: turning */
+				/* Case: turning */
 				if (nextDirection == null) {
+					// safe mechanism, when decision module decide to go by 45 degree, we move forward first
 					this.carController.applyForwardAcceleration();
 				}else {
+					// we are at a turning point, turn
 					this.turn(delta, nextDirection);
 				}	
 			}		
@@ -101,6 +99,18 @@ public class ActionModule {
 	}
 	
 	/* function that help decide future direction */
+	Direction getFutureDirection(Coordinate futurePos, float accurate_x, float accurate_y) {
+		float future_x_dir = futurePos.x - accurate_x;
+		float future_y_dir = futurePos.y - accurate_y;
+		return this.getDirection(future_x_dir, future_y_dir);
+	}
+	
+	Direction getNextDirection(Coordinate nextPos, float accurate_x, float accurate_y) {
+		float x_dir = nextPos.x-accurate_x;
+		float y_dir = nextPos.y-accurate_y;
+		return this.getDirection(x_dir, y_dir);
+	}
+	
 	Direction getDirection(float x_dir, float y_dir) {
 		
 		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
