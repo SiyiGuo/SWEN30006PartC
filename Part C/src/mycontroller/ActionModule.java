@@ -29,83 +29,10 @@ public class ActionModule {
 		this.TurningModule = new TurningStrategy2(this.car);
 	}
 	
-	Direction getDirection(float x_dir, float y_dir) {
-		
-		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
-			return Direction.NORTH;
-		} 
-		else if ((x_dir > 0) && (Math.round(y_dir) == 0)){
-			return Direction.EAST;
-		}
-		else if ((Math.round(x_dir) == 0) && (y_dir< 0)) {
-			return Direction.SOUTH;
-		}
-		else if ((x_dir < 0) && (Math.round(y_dir) == 0)) {
-			return Direction.WEST;
-		}
-		else {
-			System.out.println(String.format("%s, %s", x_dir, y_dir));
-			System.out.println("exception case");
-			return null;
-		}
-		
-	}
-	
-	public void slowDown() {
-		if (this.car.getSpeed() > 2.5) {
-			this.car.applyReverseAcceleration();
-		} else {
-			this.car.applyBrake();
-		}
-	}
-	
-	public void reverseLavaEscaptor(ArrayList<Coordinate> path) {
-		Coordinate nextPos;
-		try {
-			nextPos = path.get(1); //as 0th element in list is our position
-		} catch(Exception e) {
-			return;
-		}
-		
-		
-		float accurate_x = this.car.getX();
-		float accurate_y = this.car.getY();
-		WorldSpatial.Direction currentDirection = this.car.getOrientation();
-
-			    
-		float x_dir = nextPos.x-accurate_x;
-		float y_dir = nextPos.y-accurate_y;
-		Direction nextDirection = this.getDirection(x_dir, y_dir);
-		
-		
-		switch (currentDirection) {
-		case EAST:
-			if (nextDirection == Direction.WEST) {
-				this.car.applyReverseAcceleration();
-			}
-			return;
-		case WEST:
-			if (nextDirection == Direction.EAST) {
-				this.car.applyReverseAcceleration();
-			}
-			return;
-		case SOUTH:
-			if (nextDirection == Direction.NORTH) {
-				this.car.applyReverseAcceleration();
-			}
-			return;
-		case NORTH:
-			if (nextDirection == Direction.SOUTH) {
-				this.car.applyReverseAcceleration();
-			}
-			return;
-		}
-		return;
-		
-	}
-
 	public void drive(float delta, ArrayList<Coordinate> path) {
-		System.out.println(path);
+		System.out.println("Received path: " + path);
+		System.out.println("curr Pos: " + this.car.getPosition());
+		
 		switch (this.car.getMode()) {
 		case SEARCHING:
 			this.StraightLineModule.setMaxSpeed((float)5);
@@ -117,7 +44,10 @@ public class ActionModule {
 		
 		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
 		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
-			this.reverseLavaEscaptor(path);
+			if(this.reverseLavaEscaptor(path)) {
+				return;
+			}
+			
 		} 
 		
 		if (path.size() == 1) {
@@ -175,6 +105,86 @@ public class ActionModule {
 			}		
 		}	
 	}
+	
+	Direction getDirection(float x_dir, float y_dir) {
+		
+		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
+			return Direction.NORTH;
+		} 
+		else if ((x_dir > 0) && (Math.round(y_dir) == 0)){
+			return Direction.EAST;
+		}
+		else if ((Math.round(x_dir) == 0) && (y_dir< 0)) {
+			return Direction.SOUTH;
+		}
+		else if ((x_dir < 0) && (Math.round(y_dir) == 0)) {
+			return Direction.WEST;
+		}
+		else {
+			System.out.println(String.format("%s, %s", x_dir, y_dir));
+			System.out.println("exception case");
+			return null;
+		}
+		
+	}
+	
+	public void slowDown() {
+		if (this.car.getSpeed() > 2.5) {
+			this.car.applyReverseAcceleration();
+		} else {
+			this.car.applyBrake();
+		}
+	}
+	
+	public boolean reverseLavaEscaptor(ArrayList<Coordinate> path) {
+		Coordinate nextPos;
+		try {
+			nextPos = path.get(1); //as 0th element in list is our position
+		} catch(Exception e) {
+			return false;
+		}
+		
+		
+		float accurate_x = this.car.getX();
+		float accurate_y = this.car.getY();
+		WorldSpatial.Direction currentDirection = this.car.getOrientation();
+
+			    
+		float x_dir = nextPos.x-accurate_x;
+		float y_dir = nextPos.y-accurate_y;
+		Direction nextDirection = this.getDirection(x_dir, y_dir);
+		
+		
+		switch (currentDirection) {
+		case EAST:
+			if (nextDirection == Direction.WEST) {
+				this.car.applyReverseAcceleration();
+				return true;
+			}
+			return false;
+		case WEST:
+			if (nextDirection == Direction.EAST) {
+				this.car.applyReverseAcceleration();
+				return true;
+			}
+			return false;
+		case SOUTH:
+			if (nextDirection == Direction.NORTH) {
+				this.car.applyReverseAcceleration();
+				return true;
+			}
+			return false;
+		case NORTH:
+			if (nextDirection == Direction.SOUTH) {
+				this.car.applyReverseAcceleration();
+				return true;
+			}
+			return false;
+		}
+		return false;
+		
+	}
+
 	
 	private boolean detectFrontWall() {
 		Coordinate currentPos = new Coordinate(this.car.getPosition());
