@@ -1,116 +1,117 @@
 package mycontroller;
 
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
-import mycontroller.DecisionModule.Mode;
 import tiles.MapTile;
 import tiles.TrapTile;
 import utilities.Coordinate;
-import world.Car;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;
 
 public class ActionModule {
-	private MyAIController car;
 	
+	private final int nextPosPathIndex = 1;
+	private final float turningThreashold = (float) 1.7;
+	
+	private MyAIController carController;
 	private StraightLineStrategy StraightLineModule;
 	private TurningStrategy TurningModule;
-	private Direction lastStraightLineDirection;
-	private boolean forwardLava = true;
-	public enum TurnDirection {LEFT, RIGHT, INVERSE};
-	public boolean needAdjustment;
 	
-	public ActionModule(MyAIController car) {
-		this.car = car;
-		this.StraightLineModule = new StraightLineStrategy1(this.car);
-		this.TurningModule = new TurningStrategy2(this.car);
+	public ActionModule(MyAIController carController) {
+		this.carController = carController;
+		this.StraightLineModule = new StraightLineStrategy1(this.carController);
+		this.TurningModule = new TurningStrategy2(this.carController);
+	}
+	
+	public Coordinate getNextTurnPosition(ArrayList<Coordinate> path) {
+		/* this function return the position which turn is required in the future 3 step*/
+		final int futureVisionRange = 3;
+		final int normalRangeTurn = 2;
+		final int nearestTurn = 1;
+		if (path.size() >= futureVisionRange) {
+			return path.get(normalRangeTurn);
+		} else {
+			return path.get(nearestTurn);
+		}
 	}
 	
 	public void drive(float delta, ArrayList<Coordinate> path) {
 		System.out.println("Received path: " + path);
-		System.out.println("curr Pos: " + this.car.getPosition());
+		System.out.println("curr Pos: " + this.carController.getPosition());
 		
-		switch (this.car.getMode()) {
-		case SEARCHING:
-			this.StraightLineModule.setMaxSpeed((float)5);
-			break;
-		case DESTINATION:
-			this.StraightLineModule.setMaxSpeed((float)5);
-			break;
-		}
+		//Get current position information
+		float accurate_x = this.carController.getX();
+		float accurate_y = this.carController.getY();
+		WorldSpatial.Direction currentDirection = this.carController.getOrientation();
+		Coordinate currentPos = new Coordinate(this.carController.getPosition());
 		
-		HashMap<Coordinate, MapTile> knownMap = this.car.getKnownMap();
-		if (knownMap.get(new Coordinate(this.car.getPosition())).isType(MapTile.Type.TRAP) && ((TrapTile)knownMap.get(new Coordinate(this.car.getPosition()))).getTrap().equals("lava")) {
-			if(this.reverseLavaEscaptor(path)) {
+		HashMap<Coordinate, MapTile> knownMap = this.carController.getKnownMap();
+		
+		/* case: we are one a lava */
+		if (PerceptionModule.isLava(currentPos, knownMap)) {
+			if(this.reverseLavaEscaptorNeeded(path)) {
+				/* case: we have escape this lava immediately */
+				this.escapeLava();
 				return;
 			}
-			
+			/* case: no need to escape, follow plan*/
 		} 
 		
+		/* case:  arrayList only has one element */
 		if (path.size() == 1) {
-			if (path.get(0).toString().equals("99,99")) {
-				System.out.println("Do MNothjing");
-				Coordinate currentPos = new Coordinate(this.car.getPosition());
-				System.out.println(currentPos);
-				this.car.applyBrake();;
-			}
-			
+			this.recoverHealth(path);
 		} else {
-			Coordinate nextPos = path.get(1); //as 0th element in list is our position
-			Coordinate currentPos = new Coordinate(this.car.getPosition());
-			float accurate_x = this.car.getX();
-			float accurate_y = this.car.getY();
-			WorldSpatial.Direction currentDirection = this.car.getOrientation();
-	
-				    
-			float x_dir = nextPos.x-accurate_x;
-			float y_dir = nextPos.y-accurate_y;
-			Direction nextDirection = this.getDirection(x_dir, y_dir);
-			System.out.println(String.format("next:%s, current:%s, currentDirection:%s, nextDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, nextDirection,
-					accurate_x, accurate_y));
+		/* case: normal route, multiple element in arrayList */
+			
+			//Get next position's info
+			Coordinate nextPos = path.get(nextPosPathIndex); //as 0th element in list is our position	  
+			Direction nextDirection = this.getNextDirection(nextPos, accurate_x, accurate_y);
+			
 			
 			if (currentDirection.equals(nextDirection)) {
-				//Case: on a Straight line
+				/* Case: on a Straight line */
 				
-				Coordinate futurePos;
-				if (path.size() >= 3) {
-					futurePos = path.get(2);
-				} else {
-					futurePos = path.get(1);
-				}
-				
-				
-				float future_x_dir = futurePos.x - accurate_x;
-				float future_y_dir = futurePos.y - accurate_y;
-				Direction futureDirection = this.getDirection(future_x_dir, future_y_dir);
+				//get future turning position info
+				Coordinate futurePos = this.getNextTurnPosition(path);
+				Direction futureDirection = this.getFutureDirection(futurePos, accurate_x, accurate_y);
 
-				System.out.println(futureDirection);
-				//If there is going to be a turn
-				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.7) {
+				if (!currentDirection.equals(futureDirection) && this.carController.getSpeed() > turningThreashold) {
+					// case: turn in the future
+					// we need to slow down
 					this.slowDown();
-					
-					
 				}else {
-					System.out.println("Move forward");
-					this.move(nextPos, accurate_x, accurate_y);
-					this.lastStraightLineDirection = nextDirection;
-					this.needAdjustment = true;
+					// case: no need to slow down
+					this.goStraight(nextPos, accurate_x, accurate_y);
 				}
 				
 			} else { 
+				/* Case: turning */
 				if (nextDirection == null) {
-					this.car.applyForwardAcceleration();
+					// safe mechanism, when decision module decide to go by 45 degree, we move forward first
+					this.carController.applyForwardAcceleration();
 				}else {
+					// we are at a turning point, turn
 					this.turn(delta, nextDirection);
 				}	
 			}		
 		}	
 	}
 	
-	Direction getDirection(float x_dir, float y_dir) {
+	/* function that help decide future direction */
+	private Direction getFutureDirection(Coordinate futurePos, float accurate_x, float accurate_y) {
+		float future_x_dir = futurePos.x - accurate_x;
+		float future_y_dir = futurePos.y - accurate_y;
+		return this.getDirection(future_x_dir, future_y_dir);
+	}
+	
+	private Direction getNextDirection(Coordinate nextPos, float accurate_x, float accurate_y) {
+		float x_dir = nextPos.x-accurate_x;
+		float y_dir = nextPos.y-accurate_y;
+		return this.getDirection(x_dir, y_dir);
+	}
+	
+	private Direction getDirection(float x_dir, float y_dir) {
 		
 		if ((Math.round(x_dir) == 0 & y_dir > 0)) {
 			return Direction.NORTH;
@@ -132,15 +133,9 @@ public class ActionModule {
 		
 	}
 	
-	public void slowDown() {
-		if (this.car.getSpeed() > 2.5) {
-			this.car.applyReverseAcceleration();
-		} else {
-			this.car.applyBrake();
-		}
-	}
-	
-	public boolean reverseLavaEscaptor(ArrayList<Coordinate> path) {
+
+	/*function that judging on the current state */
+	private boolean reverseLavaEscaptorNeeded(ArrayList<Coordinate> path) {
 		System.out.println("escape");
 		Coordinate nextPos;
 		try {
@@ -151,9 +146,9 @@ public class ActionModule {
 		}
 		
 		
-		float accurate_x = this.car.getX();
-		float accurate_y = this.car.getY();
-		WorldSpatial.Direction currentDirection = this.car.getOrientation();
+		float accurate_x = this.carController.getX();
+		float accurate_y = this.carController.getY();
+		WorldSpatial.Direction currentDirection = this.carController.getOrientation();
 
 			    
 		float x_dir = nextPos.x-accurate_x;
@@ -164,25 +159,21 @@ public class ActionModule {
 		switch (currentDirection) {
 		case EAST:
 			if (nextDirection == Direction.WEST) {
-				this.car.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case WEST:
 			if (nextDirection == Direction.EAST) {
-				this.car.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case SOUTH:
 			if (nextDirection == Direction.NORTH) {
-				this.car.applyReverseAcceleration();
 				return true;
 			}
 			return false;
 		case NORTH:
 			if (nextDirection == Direction.SOUTH) {
-				this.car.applyReverseAcceleration();
 				return true;
 			}
 			return false;
@@ -190,12 +181,32 @@ public class ActionModule {
 		return false;
 		
 	}
-
-	public void move(Coordinate nextPos, float accurate_x, float accurate_y) {
+	
+	/*different kinds of motion module */
+	private void recoverHealth(ArrayList<Coordinate> path) {
+		/* case the command is Staying here to heal the health */
+		if (path.get(0).toString().equals(DecisionModule.DONOTHING)) {
+			this.carController.applyBrake();;
+		}
+	}
+	
+	private void escapeLava() {
+		this.carController.applyReverseAcceleration();
+	}
+		
+	private void slowDown() {
+		if (this.carController.getSpeed() > 2.5) {
+			this.carController.applyReverseAcceleration();
+		} else {
+			this.carController.applyBrake();
+		}
+	}
+	
+	private void goStraight(Coordinate nextPos, float accurate_x, float accurate_y) {
 		this.StraightLineModule.move(nextPos, accurate_x, accurate_y);	
 	}
 		
-	public void turn(float delta, Direction direction) {
+	private void turn(float delta, Direction direction) {
 		int absoluteDegree = 0;
 		switch (direction) {
 		case EAST:
