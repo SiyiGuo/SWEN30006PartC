@@ -10,13 +10,18 @@ public class TurningStrategy2 implements TurningStrategy{
 	
 	@Override
 	public void turn(float delta, int absoluteDegree) {
-		this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
+		if (this.car.getSpeed() > 0.5) {
+			this.car.applyBrake();
+		} else {
+			this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
+		}
+		
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
 		if ((currentDegree != absoluteDegree)) {
 			
-			if (this.car.getSpeed() > 0.10) {
+			if (this.car.getSpeed() > 0.1) {
 				this.car.applyBrake();
 			} else {
 				this.car.applyReverseAcceleration();
