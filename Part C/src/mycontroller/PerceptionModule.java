@@ -88,6 +88,23 @@ public class PerceptionModule {
 		}else
 			return false;
 	}
+
+	/**
+	 * check if a given coordinate is in the map and if is a a road
+	 * @param coor is the Coordinate to check
+	 * @param knownMap is a map recorded by the PerceptionModule
+	 * @return
+	 */
+	public static boolean isRoad(Coordinate coor, HashMap<Coordinate, MapTile> knownMap) {
+		if (!knownMap.containsKey(coor)) {
+			return false;
+		}
+		MapTile tile = knownMap.get(coor);
+		if (tile.isType(MapTile.Type.ROAD)) {
+			return true;
+		}else
+			return false;
+	}
 	
 	/**
 	 * record what the car detected at the current position into the knownMap

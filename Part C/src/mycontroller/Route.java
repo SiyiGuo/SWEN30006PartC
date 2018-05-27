@@ -89,7 +89,7 @@ public class Route {
 	/**
 	 * this method finds the coordinate of the tile behind the car by a certain distance
 	 */
-	public Coordinate getForwardCoor(Coordinate current, int direction, int distance) {
+	public static Coordinate getForwardCoor(Coordinate current, int direction, int distance) {
 		int x = current.x;
 		int y = current.y;
 		switch(direction) {

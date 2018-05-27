@@ -18,6 +18,8 @@ public class DecisionModule {
 	public static final int WEST = 2;
 	public static final int SOUTH = 3;
 	public static final int MAXCOST = 999999;
+	private static final int MAXESCAPESEARCHRANGE = 10;
+	private static final int TURNPUNISHMENT = 3;
 	
 	private Car car;
 	private MyAIController controller;
@@ -125,9 +127,15 @@ public class DecisionModule {
 			Coordinate lastNode = path.get(path.size() - 1);
 			
 			if (destinations.contains(lastNode)) {
+				
 				this.positionWhenLastFindPath = currentCoor;
-				this.lastPath = new ArrayList<Coordinate>(route.getPath());
-				return processWithRecoverStrategy(route.getPath());
+				path = route.getPath();
+				path = processWithRecoverStrategy(path);
+				if (PerceptionModule.isLava(path.get(path.size() - 1), this.controller.getKnownMap())) {
+					path = processWithLavaEscapeStrategy(path, route.getCurrentDirection());
+				}
+				this.lastPath = new ArrayList<Coordinate>(path);
+				return path;
 			}
 			
 			Coordinate lastNodeWest = new Coordinate((lastNode.x - 1) + "," + lastNode.y);
@@ -155,6 +163,47 @@ public class DecisionModule {
 		}
 		System.out.println("returning null!");
 		return null;
+	}
+	
+	private ArrayList<Coordinate> escapeSearch(Coordinate lastNode, int dir, ArrayList<Coordinate> path) {
+		HashMap<Coordinate, MapTile> knownMap = this.controller.getKnownMap();
+		for (int i = 1; i <= MAXESCAPESEARCHRANGE; i++) {
+			Coordinate forwardTile = Route.getForwardCoor(lastNode, dir, i);
+			if (PerceptionModule.isWall(forwardTile, knownMap)) {
+				break;
+			}
+			if (!PerceptionModule.isLava(forwardTile, knownMap)) {
+				// escape tile found, add to path
+				for (int j = 1; j <= i; j++) {
+					path.add(Route.getForwardCoor(lastNode, dir, j));
+				}
+				return path;
+			}				
+		}
+		return null;
+	}
+	
+	private ArrayList<Coordinate> processWithLavaEscapeStrategy(ArrayList<Coordinate> path, int dir) {
+		Coordinate lastNode = path.get(path.size() - 1);
+		ArrayList<Coordinate> fresult, bresult, lresult, rresult;
+		int forward = dir, backward = (dir + 2) % 4, min = path.size() + MAXESCAPESEARCHRANGE,
+			left = (dir + 1) % 4, right = (dir + 3) % 4;
+		
+		fresult = this.escapeSearch(lastNode, forward, path);
+		bresult = this.escapeSearch(lastNode, backward, path);
+		lresult = this.escapeSearch(lastNode, left, path);
+		rresult = this.escapeSearch(lastNode, right, path);
+
+		min = fresult != null && fresult.size() < min? fresult.size(): min;
+		min = bresult != null && bresult.size() < min? bresult.size(): min;
+		min = lresult != null && lresult.size() + TURNPUNISHMENT < min? lresult.size() + TURNPUNISHMENT: min;
+		min = rresult != null && rresult.size() + TURNPUNISHMENT < min? rresult.size() + TURNPUNISHMENT: min;
+
+		if(min == fresult.size()) return fresult;
+		if(min == bresult.size()) return bresult;
+		if(min == lresult.size() + TURNPUNISHMENT) return lresult;
+		if(min == rresult.size() + TURNPUNISHMENT) return rresult;
+		return path;
 	}
 	
 	/**
