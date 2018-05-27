@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import mycontroller.DecisionModule.Mode;
 import tiles.MapTile;
 import tiles.TrapTile;
 import utilities.Coordinate;
@@ -18,6 +19,7 @@ public class ActionModule {
 	private TurningStrategy TurningModule;
 	private Direction lastStraightLineDirection;
 	public enum TurnDirection {LEFT, RIGHT, INVERSE};
+	public boolean needAdjustment;
 	
 	public ActionModule(MyAIController car) {
 		this.car = car;
@@ -87,11 +89,11 @@ public class ActionModule {
 				    
 			float x_dir = nextPos.x-accurate_x;
 			float y_dir = nextPos.y-accurate_y;
-			Direction direction = this.getDirection(x_dir, y_dir);
-			System.out.println(String.format("next:%s, current:%s, myDirection:%s, nextDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, direction,
+			Direction nextDirection = this.getDirection(x_dir, y_dir);
+			System.out.println(String.format("next:%s, current:%s, currentDirection:%s, nextDirection:%s, myX:%s, myY:%s", nextPos, currentPos, currentDirection, nextDirection,
 					accurate_x, accurate_y));
 			
-			if (currentDirection.equals(direction)) {
+			if (currentDirection.equals(nextDirection)) {
 				//Case: on a Straight line
 				
 				Coordinate futurePos;
@@ -106,21 +108,23 @@ public class ActionModule {
 				float future_y_dir = futurePos.y - accurate_y;
 				Direction futureDirection = this.getDirection(future_x_dir, future_y_dir);
 
-				
+				System.out.println(futureDirection);
 				//If there is going to be a turn
 				if (!currentDirection.equals(futureDirection) && this.car.getSpeed() > 1.7) {
+					
+					
 					System.out.println("backward");
 					System.out.println(String.format("%s, %s", future_x_dir, future_y_dir));
 					this.car.applyReverseAcceleration();
-				} else {
+				}else {
 					System.out.println("Move forward");
 					this.move(nextPos, accurate_x, accurate_y);
-					this.lastStraightLineDirection = direction;
+					this.lastStraightLineDirection = nextDirection;
+					this.needAdjustment = true;
 				}
 				
-			} else {
-				//Case Turning
-			    this.turn(delta, direction);
+			} else { 
+			    this.turn(delta, nextDirection);		
 			}		
 		}	
 	}
