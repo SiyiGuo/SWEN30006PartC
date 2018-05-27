@@ -15,7 +15,6 @@ public class TurningStrategy2 implements TurningStrategy{
 		} else {
 			this.turnToDirection(this.car.getAngle(), delta, absoluteDegree);
 		}
-		
 	}
 	
 	private void turnToDirection(float currentDegree, float delta, int absoluteDegree) {
