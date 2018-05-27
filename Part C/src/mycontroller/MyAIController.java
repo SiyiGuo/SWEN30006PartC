@@ -4,13 +4,9 @@ import java.util.HashMap;
 import java.util.ArrayList; 
 import controller.CarController;
 import mycontroller.DecisionModule.Mode;
-import tiles.LavaTrap; 
 import tiles.MapTile; 
-import tiles.TrapTile; 
 import utilities.Coordinate; 
 import world.Car; 
-import world.WorldSpatial; 
-import world.WorldSpatial.Direction;
 
 public class MyAIController extends CarController{
 		// Offset used to differentiate between 0 and 360 degrees

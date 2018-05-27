@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import tiles.MapTile;
-import tiles.TrapTile;
 import utilities.Coordinate;
 import world.WorldSpatial;
 import world.WorldSpatial.Direction;

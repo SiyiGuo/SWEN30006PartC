@@ -1,6 +1,5 @@
 package mycontroller;
 import utilities.Coordinate;
-import world.Car;
 
 public class StraightLineStrategy1 implements StraightLineStrategy{
 	private MyAIController carController;
